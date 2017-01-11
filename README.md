@@ -1,10 +1,9 @@
 # argentcrusade/selectel-cloud-storage
 
-[![Latest Version on Packagist][ico-version]][link-packagist]
-[![Software License][ico-license]](LICENSE.md)
 [![Build Status][ico-travis]][link-travis]
 [![StyleCI][ico-styleci]][link-styleci]
-[![Total Downloads][ico-downloads]][link-downloads]
+[![Latest Version on Packagist][ico-version]][link-packagist]
+[![Software License][ico-license]](LICENSE.md)
 
 Unofficial PHP SDK for [Selectel Cloud Storage](https://selectel.com/services/cloud-storage/) API.
 
@@ -205,10 +204,8 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 [ico-license]: https://poser.pugx.org/argentcrusade/selectel-cloud-storage/license?format=flat
 [ico-travis]: https://api.travis-ci.org/ArgentCrusade/selectel-cloud-storage.svg?branch=master
 [ico-styleci]: https://styleci.io/repos/78674486/shield?branch=master&style=flat
-[ico-downloads]: https://poser.pugx.org/argentcrusade/selectel-cloud-storage/downloads?format=flat
 
 [link-packagist]: https://packagist.org/packages/argentcrusade/selectel-cloud-storage
-[link-travis]: https://travis-ci.org/argentcrusade/selectel-cloud-storage
+[link-travis]: https://travis-ci.org/ArgentCrusade/selectel-cloud-storage
 [link-styleci]: https://styleci.io/repos/78674486
-[link-downloads]: https://packagist.org/packages/argentcrusade/selectel-cloud-storage
 [link-author]: https://github.com/tzurbaev
