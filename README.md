@@ -8,7 +8,7 @@
 Unofficial PHP SDK for [Selectel Cloud Storage](https://selectel.com/services/cloud-storage/) API.
 
 ## Requirements
-This package requires PHP 5.5 or higher.
+This package requires PHP 5.6 or higher.
 
 ## Installation
 

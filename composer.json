@@ -5,7 +5,7 @@
     "homepage": "https://github.com/argentcrusade/selectel-cloud-storage",
     "license": "MIT",
     "require": {
-        "php": ">=5.5",
+        "php": ">=5.6",
         "guzzlehttp/guzzle": "^6.2"
     },
     "require-dev": {
