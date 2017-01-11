@@ -3,6 +3,7 @@
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
 [![Build Status][ico-travis]][link-travis]
+[![StyleCI][ico-styleci]][link-styleci]
 [![Total Downloads][ico-downloads]][link-downloads]
 
 Unofficial PHP SDK for [Selectel Cloud Storage](https://selectel.com/services/cloud-storage/) API.
@@ -200,12 +201,14 @@ If you discover any security related issues, please email zurbaev@gmail.com inst
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
-[ico-version]: https://img.shields.io/packagist/v/argentcrusade/selectel-cloud-storage.svg?style=flat-square
-[ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
-[ico-travis]: https://img.shields.io/travis/argentcrusade/selectel-cloud-storage/master.svg?style=flat-square
-[ico-downloads]: https://img.shields.io/packagist/dt/argentcrusade/selectel-cloud-storage.svg?style=flat-square
+[ico-version]: https://poser.pugx.org/argentcrusade/selectel-cloud-storage/version?format=flat
+[ico-license]: https://poser.pugx.org/argentcrusade/selectel-cloud-storage/license?format=flat
+[ico-travis]: https://api.travis-ci.org/ArgentCrusade/selectel-cloud-storage.svg?branch=master
+[ico-styleci]: https://styleci.io/repos/78674486/shield?branch=master&style=flat
+[ico-downloads]: https://poser.pugx.org/argentcrusade/selectel-cloud-storage/downloads?format=flat
 
 [link-packagist]: https://packagist.org/packages/argentcrusade/selectel-cloud-storage
 [link-travis]: https://travis-ci.org/argentcrusade/selectel-cloud-storage
+[link-styleci]: https://styleci.io/repos/78674486
 [link-downloads]: https://packagist.org/packages/argentcrusade/selectel-cloud-storage
 [link-author]: https://github.com/tzurbaev
