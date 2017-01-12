@@ -79,7 +79,7 @@ $container = $containers->get('my-container');
 
 // Get container attributes.
 $name = $container->name(); // 'container-name'.
-$type = $container->type(); // 'private' or 'public'.
+$type = $container->type(); // 'private', 'public' or 'gallery'.
 $filesCount = $container->filesCount(); // or count($container); // or $container->count();
 $sizeInBytes = $container->size();
 $uploadedBytes = $container->uploadedBytes(); // Total number of bytes uploaded to container (rx_bytes).
@@ -200,10 +200,10 @@ $firstFile will be something like this:
 */
 ```
 
-But when you're using `Container::files()->get` method, you receive instance of `ArgentCrusade\Selectel\CloudStorage\File` class that implements `JsonSerializable` interface. With this object you can perform operations such as renaming, copying and deleting file.
+But when you're using `Container::files()->find` method, you receive instance of `ArgentCrusade\Selectel\CloudStorage\File` class that implements `JsonSerializable` interface. With this object you can perform operations such as renaming, copying and deleting file.
 
 ```php
-$file = $container->files()->get('/path/to/file.txt');
+$file = $container->files()->find('/path/to/file.txt');
 
 // Get file attributes.
 $containerName = $file->container(); // 'my-container'
