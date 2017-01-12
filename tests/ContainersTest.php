@@ -122,6 +122,50 @@ class ContainersTest extends PHPUnit_Framework_TestCase
     }
 
     /** @test */
+    function container_can_create_directories()
+    {
+        $api = TestHelpers::mockApi(function ($api) {
+            $containerRequest = $this->getContainerRequest('container1');
+            $createDirRequest = $this->getDirectoryCreateRequest('/container1/test-directory');
+
+            $api->shouldReceive('request')
+                ->with($containerRequest['method'], $containerRequest['url'])
+                ->andReturn($containerRequest['response']);
+
+            $api->shouldReceive('request')
+                ->with($createDirRequest['method'], $createDirRequest['url'], $createDirRequest['params'])
+                ->andReturn($createDirRequest['response']);
+        });
+
+        $storage = new CloudStorage($api);
+        $container = $storage->getContainer('container1');
+
+        $this->assertEquals(md5('test'), $container->createDir('/test-directory'));
+    }
+
+    /** @test */
+    function container_can_delete_directories()
+    {
+        $api = TestHelpers::mockApi(function ($api) {
+            $containerRequest = $this->getContainerRequest('container1');
+            $deleteDirRequest = $this->getDirectoryDeleteRequest('/container1/test-directory');
+
+            $api->shouldReceive('request')
+                ->with($containerRequest['method'], $containerRequest['url'])
+                ->andReturn($containerRequest['response']);
+
+            $api->shouldReceive('request')
+                ->with($deleteDirRequest['method'], $deleteDirRequest['url'])
+                ->andReturn($deleteDirRequest['response']);
+        });
+
+        $storage = new CloudStorage($api);
+        $container = $storage->getContainer('container1');
+
+        $this->assertTrue($container->deleteDir('/test-directory'));
+    }
+
+    /** @test */
     function files_can_be_uploaded_to_container_from_string()
     {
         $contents = '<h1>Hello World!</h1>';
@@ -197,6 +241,31 @@ class ContainersTest extends PHPUnit_Framework_TestCase
         $storage = new CloudStorage($api);
         $container = $storage->getContainer('container1');
         $container->delete();
+    }
+
+    public function getDirectoryCreateRequest($path)
+    {
+        return [
+            'method' => 'PUT',
+            'url' => $path,
+            'params' => [
+                'headers' => [
+                    'Content-Type' => 'application/directory',
+                ],
+            ],
+            'response' => TestHelpers::toResponse('', 201, [
+                'etag' => md5('test'),
+            ]),
+        ];
+    }
+
+    public function getDirectoryDeleteRequest($path)
+    {
+        return [
+            'method' => 'DELETE',
+            'url' => $path,
+            'response' => TestHelpers::toResponse('', 204, []),
+        ];
     }
 
     public function uploadFromStreamRequest($container, $path, $resource)

@@ -123,7 +123,7 @@ class FilesTest extends PHPUnit_Framework_TestCase
             $requests = [
                 $this->listContainersRequest(),
                 $this->listSingleFileRequest('container1', 'web/index.html', 'text/html'),
-                $this->renameFileRequest('container1/web/index.html', 'container1/web/index2.html'),
+                $this->renameFileRequest('/container1/web/index.html', '/container1/web/index2.html'),
             ];
 
             foreach ($requests as $request) {
@@ -132,7 +132,7 @@ class FilesTest extends PHPUnit_Framework_TestCase
                     ->andReturn($request['response']);
             }
 
-            $deleteRequest = $this->deleteFileRequest('container1/web/index.html');
+            $deleteRequest = $this->deleteFileRequest('/container1/web/index.html');
 
             $api->shouldReceive('request')
                 ->with($deleteRequest['method'], $deleteRequest['url'])
@@ -201,7 +201,7 @@ class FilesTest extends PHPUnit_Framework_TestCase
                     ->andReturn($request['response']);
             }
 
-            $deleteRequest = $this->deleteFileRequest('container1/web/index.html');
+            $deleteRequest = $this->deleteFileRequest('/container1/web/index.html');
 
             $api->shouldReceive('request')
                 ->with($deleteRequest['method'], $deleteRequest['url'])

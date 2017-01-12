@@ -84,7 +84,7 @@ class Container implements ContainerContract, Countable, JsonSerializable
         // If user really wants some container info, we will load
         // it here on demand. This speeds up application a bit.
 
-        $response = $this->api->request('HEAD', '/'.$this->name());
+        $response = $this->api->request('HEAD', $this->absolutePath());
 
         if ($response->getStatusCode() !== 204) {
             throw new ApiRequestFailedException('Container "'.$this->name().'" was not found.');
@@ -98,6 +98,18 @@ class Container implements ContainerContract, Countable, JsonSerializable
             'rx_bytes' => intval($response->getHeaderLine('X-Received-Bytes')),
             'tx_bytes' => intval($response->getHeaderLine('X-Transfered-Bytes')),
         ];
+    }
+
+    /**
+     * Absolute path to file from storage root.
+     *
+     * @param string $path = '' Relative file path.
+     *
+     * @return string
+     */
+    protected function absolutePath($path = '')
+    {
+        return '/'.$this->name().($path ? '/'.ltrim($path, '/') : '');
     }
 
     /**
@@ -220,7 +232,7 @@ class Container implements ContainerContract, Countable, JsonSerializable
      */
     public function files($directory = null, $prefixOrFullPath = null, $delimiter = null, $limit = 10000, $marker = '')
     {
-        $response = $this->api->request('GET', '/'.$this->name(), [
+        $response = $this->api->request('GET', $this->absolutePath(), [
             'query' => [
                 'limit' => intval($limit),
                 'marker' => $marker,
@@ -260,6 +272,46 @@ class Container implements ContainerContract, Countable, JsonSerializable
         }
 
         return new File($this->api, $this->name(), $files->get(0));
+    }
+
+    /**
+     * Creates new directory.
+     *
+     * @param string $name Directory name.
+     *
+     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
+     *
+     * @return string
+     */
+    public function createDir($name)
+    {
+        $response = $this->api->request('PUT', $this->absolutePath($name), [
+            'headers' => [
+                'Content-Type' => 'application/directory',
+            ],
+        ]);
+
+        if ($response->getStatusCode() !== 201) {
+            throw new ApiRequestFailedException('Unable to create directory "'.$name.'".', $response->getStatusCode());
+        }
+
+        return $response->getHeaderLine('ETag');
+    }
+
+    /**
+     * Deletes directory.
+     *
+     * @param string $name Directory name.
+     */
+    public function deleteDir($name)
+    {
+        $response = $this->api->request('DELETE', $this->absolutePath($name));
+
+        if ($response->getStatusCode() !== 204) {
+            throw new ApiRequestFailedException('Unable to delete directory "'.$name.'".', $response->getStatusCode());
+        }
+
+        return true;
     }
 
     /**
@@ -309,11 +361,8 @@ class Container implements ContainerContract, Countable, JsonSerializable
      */
     protected function uploadFrom($path, $contents, array $params = [], $verifyChecksum = true)
     {
-        $headers = $this->convertUploadParamsToHeaders($contents, $params, $verifyChecksum);
-        $url = $this->normalizeUploadPath($path);
-
-        $response = $this->api->request('PUT', $url, [
-            'headers' => $headers,
+        $response = $this->api->request('PUT', $this->absolutePath($path), [
+            'headers' => $this->convertUploadParamsToHeaders($contents, $params, $verifyChecksum),
             'body' => $contents,
         ]);
 
@@ -358,25 +407,13 @@ class Container implements ContainerContract, Countable, JsonSerializable
     }
 
     /**
-     * Normalizes upload path.
-     *
-     * @param string $path Remote path (without container name).
-     *
-     * @return string
-     */
-    protected function normalizeUploadPath($path)
-    {
-        return '/'.$this->name().'/'.ltrim($path, '/');
-    }
-
-    /**
      * Deletes container. Container must be empty in order to perform this operation.
      *
      * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
      */
     public function delete()
     {
-        $response = $this->api->request('DELETE', '/'.$this->name());
+        $response = $this->api->request('DELETE', $this->absolutePath());
 
         switch ($response->getStatusCode()) {
             case 204:

@@ -95,7 +95,7 @@ interface FileContract
      *
      * @param bool $psr7Stream = false
      *
-     * @return resource | \Psr\Http\Message\StreamInterface
+     * @return resource|\Psr\Http\Message\StreamInterface
      */
     public function readStream($psr7Stream = false);
 

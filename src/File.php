@@ -68,6 +68,22 @@ class File implements FileContract, JsonSerializable
     }
 
     /**
+     * Absolute path to file from storage root.
+     *
+     * @param string $path = '' Relative file path.
+     *
+     * @return string
+     */
+    protected function absolutePath($path = '')
+    {
+        if (!$path) {
+            $path = $this->path();
+        }
+
+        return '/'.$this->container().($path ? '/'.ltrim($path, '/') : '');
+    }
+
+    /**
      * Container name.
      *
      * @throws \LogicException
@@ -186,7 +202,7 @@ class File implements FileContract, JsonSerializable
      */
     public function read()
     {
-        $response = $this->api->request('GET', '/'.$this->container().'/'.ltrim($this->path(), '/'));
+        $response = $this->api->request('GET', $this->absolutePath());
 
         return (string) $response->getBody();
     }
@@ -196,11 +212,11 @@ class File implements FileContract, JsonSerializable
      *
      * @param bool $psr7Stream = false
      *
-     * @return resource | \Psr\Http\Message\StreamInterface
+     * @return resource|\Psr\Http\Message\StreamInterface
      */
     public function readStream($psr7Stream = false)
     {
-        $response = $this->api->request('GET', '/'.$this->container().'/'.ltrim($this->path(), '/'));
+        $response = $this->api->request('GET', $this->absolutePath());
 
         if ($psr7Stream) {
             return $response->getBody();
@@ -234,9 +250,9 @@ class File implements FileContract, JsonSerializable
 
         $destination = $this->directory().'/'.$name;
 
-        $response = $this->api->request('PUT', $this->container().'/'.ltrim($destination, '/'), [
+        $response = $this->api->request('PUT', $this->absolutePath($destination), [
             'headers' => [
-                'X-Copy-From' => $this->container().'/'.$this->path(),
+                'X-Copy-From' => $this->absolutePath(),
                 'Content-Length' => 0,
             ],
         ]);
@@ -278,7 +294,7 @@ class File implements FileContract, JsonSerializable
 
         $fullDestination = '/'.$destinationContainer.'/'.ltrim($destination, '/');
 
-        $response = $this->api->request('COPY', '/'.$this->container().'/'.$this->path(), [
+        $response = $this->api->request('COPY', $this->absolutePath(), [
             'headers' => [
                 'Destination' => $fullDestination,
             ],
@@ -304,7 +320,7 @@ class File implements FileContract, JsonSerializable
     {
         $this->guardDeletedFile();
 
-        $response = $this->api->request('DELETE', $this->container().'/'.$this->path());
+        $response = $this->api->request('DELETE', $this->absolutePath());
 
         if ($response->getStatusCode() !== 204) {
             throw new ApiRequestFailedException('Unable to delete file "'.$this->path().'".', $response->getStatusCode());
