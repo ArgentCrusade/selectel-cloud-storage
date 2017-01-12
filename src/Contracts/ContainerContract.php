@@ -122,15 +122,6 @@ interface ContainerContract
     public function getFile($path);
 
     /**
-     * Transforms file array to instance of File object.
-     *
-     * @param array $file File array.
-     *
-     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\FileContract
-     */
-    public function getFileFromArray(array $file);
-
-    /**
      * Creates new directory.
      *
      * @param string $name Directory name.

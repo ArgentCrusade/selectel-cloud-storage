@@ -8,6 +8,20 @@ use ArgentCrusade\Selectel\CloudStorage\File;
 trait FilesTransformer
 {
     /**
+     * Container name. This name will be used in transformation process.
+     *
+     * @return string
+     */
+    abstract public function containerName();
+
+    /**
+     * API Client.
+     *
+     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract
+     */
+    abstract public function apiClient();
+
+    /**
      * Transforms file array to instance of File object.
      *
      * @param array $file File array.

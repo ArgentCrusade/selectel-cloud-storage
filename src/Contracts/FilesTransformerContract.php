@@ -5,20 +5,6 @@ namespace ArgentCrusade\Selectel\CloudStorage\Contracts;
 interface FilesTransformerContract
 {
     /**
-     * Container name. This name will be used in transformation process.
-     *
-     * @return string
-     */
-    public function containerName();
-
-    /**
-     * API Client.
-     *
-     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract
-     */
-    public function apiClient();
-
-    /**
      * Transforms file array to instance of File object.
      *
      * @param array $file File array.
