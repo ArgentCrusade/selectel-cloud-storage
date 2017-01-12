@@ -6,6 +6,7 @@ use ArgentCrusade\Selectel\CloudStorage\Collections\Collection;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\CloudStorageContract;
 use ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException;
+use ArgentCrusade\Selectel\CloudStorage\FileUploader;
 use InvalidArgumentException;
 
 class CloudStorage implements CloudStorageContract
@@ -18,6 +19,13 @@ class CloudStorage implements CloudStorageContract
     protected $api;
 
     /**
+     * File uploader.
+     *
+     * @var \ArgentCrusade\Selectel\CloudStorage\FileUploader
+     */
+    protected $uploader;
+
+    /**
      * Creates new instance.
      *
      * @param \ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract $api
@@ -25,6 +33,7 @@ class CloudStorage implements CloudStorageContract
     public function __construct(ApiClientContract $api)
     {
         $this->api = $api;
+        $this->uploader = new FileUploader();
     }
 
     /**
@@ -64,7 +73,7 @@ class CloudStorage implements CloudStorageContract
      */
     public function getContainer($name)
     {
-        return new Container($this->api, $name);
+        return new Container($this->api, $this->uploader, $name);
     }
 
     /**
@@ -92,7 +101,7 @@ class CloudStorage implements CloudStorageContract
 
         switch ($response->getStatusCode()) {
             case 201:
-                return new Container($this->api, trim($name, '/'));
+                return $this->getContainer(trim($name, '/'));
             case 202:
                 throw new ApiRequestFailedException('Container "'.$name.'" already exists.');
             default:
@@ -116,7 +125,7 @@ class CloudStorage implements CloudStorageContract
         $containers = [];
 
         foreach ($items as $item) {
-            $container = new Container($this->api, $item['name'], $item);
+            $container = new Container($this->api, $this->uploader, $item['name'], $item);
             $containers[$container->name()] = $container;
         }
 

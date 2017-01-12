@@ -29,7 +29,7 @@ class FilesTest extends PHPUnit_Framework_TestCase
         $containers = $storage->containers();
         $container = $containers->get('container1');
 
-        $file = $container->getFile('/web/index.html');
+        $file = $container->files()->find('/web/index.html');
 
         $this->assertEquals('container1', $file->container());
         $this->assertEquals('web/index.html', $file->path());
@@ -68,7 +68,7 @@ class FilesTest extends PHPUnit_Framework_TestCase
         $containers = $storage->containers();
         $container = $containers->get('container1');
 
-        $file = $container->getFile('/web/index.html');
+        $file = $container->files()->find('/web/index.html');
         $expected = file_get_contents(__DIR__.'/fixtures/test.html');
 
         $this->assertEquals($expected, $file->read());
@@ -100,7 +100,7 @@ class FilesTest extends PHPUnit_Framework_TestCase
         $containers = $storage->containers();
         $container = $containers->get('container1');
 
-        $file = $container->getFile('/web/index.html');
+        $file = $container->files()->find('/web/index.html');
         $expected = file_get_contents(__DIR__.'/fixtures/test.html');
         $buffer = '';
         $stream = $file->readStream();
@@ -143,7 +143,7 @@ class FilesTest extends PHPUnit_Framework_TestCase
         $containers = $storage->containers();
         $container = $containers->get('container1');
 
-        $file = $container->getFile('/web/index.html');
+        $file = $container->files()->find('/web/index.html');
  
         $this->assertEquals('index.html', $file->name());
  
@@ -175,7 +175,7 @@ class FilesTest extends PHPUnit_Framework_TestCase
         $containers = $storage->containers();
         $container = $containers->get('container1');
 
-        $file = $container->getFile('/web/index.html');
+        $file = $container->files()->find('/web/index.html');
  
         $this->assertEquals('index.html', $file->name());
 
@@ -212,7 +212,7 @@ class FilesTest extends PHPUnit_Framework_TestCase
         $containers = $storage->containers();
         $container = $containers->get('container1');
 
-        $file = $container->getFile('/web/index.html');
+        $file = $container->files()->find('/web/index.html');
 
         $this->assertFalse($file->isDeleted());
 

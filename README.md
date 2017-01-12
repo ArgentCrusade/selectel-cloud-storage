@@ -47,7 +47,6 @@ $containers = $storage->containers();
 ### Containers Collection
 `CloudStorage::containers` method returns instance of `ArgentCrusade\Selectel\CloudStorage\Collections\Collection` class with  retrieved containers objects. This collection object implements `ArrayAccess`, `Countable`, `Iterator` and `JsonSerializable` interfaces, what makes you able to do these things:
 
-
 ```php
 $containers = $storage->containers();
 
@@ -71,6 +70,7 @@ foreach ($containers as $container) {
 header('Content-Type: application/json;charset=utf-8');
 echo json_encode($containers);
 ```
+
 ### Container Instance
 Container that you've retrieved from Containers Collection is an `ArgentCrusade\Selectel\CloudStorage\Container` instance object which implements `Countable` and `JsonSerializable` interfaces.
 
@@ -86,21 +86,14 @@ $uploadedBytes = $container->uploadedBytes(); // Total number of bytes uploaded 
 $downloadedBytes = $container->downloadedBytes(); // Total number of bytes downloaded from container (tx_bytes).
 $json = json_encode($container); // JSON representation of container.
 
-// Container types.
-$isPublicContainer = $container->isPublic(); // true or false.
-$isPrivateContainer = $container->isPrivate(); // true or false.
-$isGalleryContainer = $container->isGallery(); // true or false.
-
 // Change container type.
-$container->setPublic(); // Set container visiblity to 'public'.
-$container->setPrivate(); // Set container visibility to 'private'.
-$container->setGallery(); // Set special 'gallery' type (container will become public as well).
+$container->setType(); // Set container visiblity to 'public', 'private' or 'gallery'.
 
 // Check if file exists in container.
-$fileExists = $container->fileExists('/path/to/file.txt'); // true or false.
+$fileExists = $container->files()->exists('/path/to/file.txt'); // true or false.
 
 // Get single file instance.
-$file = $container->getFile('/path/to/file.txt');
+$file = $container->files()->find('/path/to/file.txt');
 
 // Delete container.
 // Note: container must be empty!
@@ -207,10 +200,10 @@ $firstFile will be something like this:
 */
 ```
 
-But when you're using `Container::getFile` method, you receive instance of `ArgentCrusade\Selectel\CloudStorage\File` class that implements `JsonSerializable` interface. With this object you can perform operations such as renaming, copying and deleting file.
+But when you're using `Container::files()->get` method, you receive instance of `ArgentCrusade\Selectel\CloudStorage\File` class that implements `JsonSerializable` interface. With this object you can perform operations such as renaming, copying and deleting file.
 
 ```php
-$file = $container->getFile('/path/to/file.txt');
+$file = $container->files()->get('/path/to/file.txt');
 
 // Get file attributes.
 $containerName = $file->container(); // 'my-container'

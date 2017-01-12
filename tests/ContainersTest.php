@@ -66,7 +66,7 @@ class ContainersTest extends PHPUnit_Framework_TestCase
         $first = $containers->get('container1');
 
         $this->assertEquals('container1', $first->name());
-        $this->assertTrue($first->isPublic());
+        $this->assertEquals('public', $first->type());
         $this->assertEquals(2, $first->filesCount());
 
         $this->assertEquals(1024, $first->size());
@@ -212,7 +212,7 @@ class ContainersTest extends PHPUnit_Framework_TestCase
         $containers = $storage->containers();
         $container = $containers->get('container1');
 
-        $this->assertTrue($container->fileExists('test.txt'));
+        $this->assertTrue($container->files()->exists('test.txt'));
     }
 
     /** @test */
@@ -230,7 +230,7 @@ class ContainersTest extends PHPUnit_Framework_TestCase
         $container = $storage->getContainer('container1');
 
         $this->assertEquals('container1', $container->name());
-        $this->assertTrue($container->isPublic());
+        $this->assertEquals('public', $container->type());
         $this->assertEquals(2, $container->filesCount());
 
         $this->assertEquals(1024, $container->size());
@@ -264,16 +264,16 @@ class ContainersTest extends PHPUnit_Framework_TestCase
         $storage = new CloudStorage($api);
         $container = $storage->getContainer('container1');
 
-        $this->assertTrue($container->isPublic());
+        $this->assertEquals('public', $container->type());
 
-        $container->setPrivate();
-        $this->assertTrue($container->isPrivate());
+        $container->setType('private');
+        $this->assertEquals('private', $container->type());
 
-        $container->setGallery();
-        $this->assertTrue($container->isGallery());
+        $container->setType('gallery');
+        $this->assertEquals('gallery', $container->type());
 
-        $container->setPublic();
-        $this->assertTrue($container->isPublic());
+        $container->setType('public');
+        $this->assertEquals('public', $container->type());
     }
 
     /** @test */

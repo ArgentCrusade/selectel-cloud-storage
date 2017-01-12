@@ -24,6 +24,13 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
     protected $api;
 
     /**
+     * File uploader.
+     *
+     * @var \ArgentCrusade\Selectel\CloudStorage\Contracts\FileUploaderContract
+     */
+    protected $uploader;
+
+    /**
      * Container name.
      *
      * @var string
@@ -46,12 +53,14 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
 
     /**
      * @param \ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract $api
+     * @param \ArgentCrusade\Selectel\CloudStorage\FileUploader                    $uploader
      * @param string                                                               $name
      * @param array                                                                $data
      */
-    public function __construct(ApiClientContract $api, $name, array $data = [])
+    public function __construct(ApiClientContract $api, FileUploader $uploader, $name, array $data = [])
     {
         $this->api = $api;
+        $this->uploader = $uploader;
         $this->containerName = $name;
         $this->data = $data;
         $this->dataLoaded = !empty($data);
@@ -224,72 +233,6 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
     }
 
     /**
-     * Determines if container is public.
-     *
-     * @return bool
-     */
-    public function isPublic()
-    {
-        return $this->type() == 'public';
-    }
-
-    /**
-     * Determines if container is private.
-     *
-     * @return bool
-     */
-    public function isPrivate()
-    {
-        return $this->type() == 'private';
-    }
-
-    /**
-     * Determines if container is a gallery container.
-     *
-     * @return bool
-     */
-    public function isGallery()
-    {
-        return $this->type() == 'gallery';
-    }
-
-    /**
-     * Sets container type to 'public'.
-     *
-     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
-     *
-     * @return string
-     */
-    public function setPublic()
-    {
-        return $this->setType('public');
-    }
-
-    /**
-     * Sets container type to 'private'.
-     *
-     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
-     *
-     * @return string
-     */
-    public function setPrivate()
-    {
-        return $this->setType('private');
-    }
-
-    /**
-     * Sets container type to 'gallery'.
-     *
-     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
-     *
-     * @return string
-     */
-    public function setGallery()
-    {
-        return $this->setType('gallery');
-    }
-
-    /**
      * Updates container type.
      *
      * @param string $type Container type, 'public', 'private' or 'gallery'.
@@ -298,7 +241,7 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
      *
      * @return string
      */
-    protected function setType($type)
+    public function setType($type)
     {
         if ($this->type() === $type) {
             return $type;
@@ -325,32 +268,6 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
     public function files()
     {
         return new FluentFilesLoader($this->api, $this->name(), $this->absolutePath());
-    }
-
-    /**
-     * Determines whether file exists or not.
-     *
-     * @param string $path File path.
-     *
-     * @return bool
-     */
-    public function fileExists($path)
-    {
-        return $this->files()->exists($path);
-    }
-
-    /**
-     * Retrieves file object container. This method does not actually download file, see File::read or File::readStream.
-     *
-     * @param string $path
-     *
-     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\FileNotFoundException
-     *
-     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\FileContract
-     */
-    public function getFile($path)
-    {
-        return $this->files()->find($path);
     }
 
     /**
@@ -407,7 +324,7 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
      */
     public function uploadFromString($path, $contents, array $params = [], $verifyChecksum = true)
     {
-        return $this->uploadFrom($path, $contents, $params, $verifyChecksum);
+        return $this->uploader->upload($this->api, $this->absolutePath($path), $contents, $params, $verifyChecksum);
     }
 
     /**
@@ -423,66 +340,7 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
      */
     public function uploadFromStream($path, $resource, array $params = [])
     {
-        return $this->uploadFrom($path, $resource, $params, false);
-    }
-
-    /**
-     * Upload file from string or stream resource.
-     *
-     * @param string            $path           Remote path.
-     * @param string | resource $contents       File contents.
-     * @param array             $params         = [] Upload params.
-     * @param bool              $verifyChecksum = true
-     *
-     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\UploadFailedException
-     *
-     * @return string
-     */
-    protected function uploadFrom($path, $contents, array $params = [], $verifyChecksum = true)
-    {
-        $response = $this->api->request('PUT', $this->absolutePath($path), [
-            'headers' => $this->convertUploadParamsToHeaders($contents, $params, $verifyChecksum),
-            'body' => $contents,
-        ]);
-
-        if ($response->getStatusCode() !== 201) {
-            throw new UploadFailedException('Unable to upload file.', $response->getStatusCode());
-        }
-
-        return $response->getHeaderLine('ETag');
-    }
-
-    /**
-     * Parses upload parameters and assigns them to appropriate HTTP headers.
-     *
-     * @param string $contents       = null
-     * @param array  $params         = []
-     * @param bool   $verifyChecksum = true
-     *
-     * @return array
-     */
-    protected function convertUploadParamsToHeaders($contents = null, array $params = [], $verifyChecksum = true)
-    {
-        $headers = [];
-
-        if ($verifyChecksum) {
-            $headers['ETag'] = md5($contents);
-        }
-
-        $availableParams = [
-            'contentType' => 'Content-Type',
-            'contentDisposition' => 'Content-Disposition',
-            'deleteAfter' => 'X-Delete-After',
-            'deleteAt' => 'X-Delete-At',
-        ];
-
-        foreach ($availableParams as $key => $header) {
-            if (isset($params[$key])) {
-                $headers[$header] = $params[$key];
-            }
-        }
-
-        return $headers;
+        return $this->uploader->upload($this->api, $this->absolutePath($path), $resource, $params, false);
     }
 
     /**

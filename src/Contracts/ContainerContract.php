@@ -47,52 +47,15 @@ interface ContainerContract
     public function downloadedBytes();
 
     /**
-     * Determines if container is public.
+     * Updates container type.
      *
-     * @return bool
-     */
-    public function isPublic();
-
-    /**
-     * Determines if container is private.
-     *
-     * @return bool
-     */
-    public function isPrivate();
-
-    /**
-     * Determines if container is a gallery container.
-     *
-     * @return bool
-     */
-    public function isGallery();
-
-    /**
-     * Sets container type to 'public'.
+     * @param string $type Container type, 'public', 'private' or 'gallery'.
      *
      * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
      *
      * @return string
      */
-    public function setPublic();
-
-    /**
-     * Sets container type to 'private'.
-     *
-     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
-     *
-     * @return string
-     */
-    public function setPrivate();
-
-    /**
-     * Sets container type to 'gallery'.
-     *
-     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
-     *
-     * @return string
-     */
-    public function setGallery();
+    public function setType($type);
 
     /**
      * Creates new Fluent files loader instance.
@@ -100,26 +63,6 @@ interface ContainerContract
      * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\FluentFilesLoaderContract
      */
     public function files();
-
-    /**
-     * Determines whether file exists or not.
-     *
-     * @param string $path File path.
-     *
-     * @return bool
-     */
-    public function fileExists($path);
-
-    /**
-     * Retrieves file object container. This method does not actually download file, see File::download.
-     *
-     * @param string $path
-     *
-     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\FileNotFoundException
-     *
-     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\FileContract
-     */
-    public function getFile($path);
 
     /**
      * Creates new directory.
