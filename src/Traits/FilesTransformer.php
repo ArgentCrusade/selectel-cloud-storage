@@ -16,7 +16,7 @@ trait FilesTransformer
      */
     public function getFileFromArray(array $file)
     {
-        return new File($this->api, $this->containerName, $file);
+        return new File($this->apiClient(), $this->containerName(), $file);
     }
 
     /**

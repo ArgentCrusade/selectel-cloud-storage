@@ -96,6 +96,12 @@ $container->setPublic(); // Set container visiblity to 'public'.
 $container->setPrivate(); // Set container visibility to 'private'.
 $container->setGallery(); // Set special 'gallery' type (container will become public as well).
 
+// Check if file exists in container.
+$fileExists = $container->fileExists('/path/to/file.txt'); // true or false.
+
+// Get single file instance.
+$file = $container->getFile('/path/to/file.txt');
+
 // Delete container.
 // Note: container must be empty!
 $container->delete();
@@ -144,12 +150,17 @@ $files = $container->files()->fromDirectory('photos')->asFileObjects()->get();
 $files[0]->name(); // First file's name.
 
 // Warning: converting a lot of files to `File` instances may result in performance loss.
+```
 
-// Check if file exists.
-$fileExists = $container->fileExists('/path/to/file.txt'); // true or false.
+If you need to create `FluentFilesLoader` instance without `Container` instance, use following code:
 
-// Get single file instance.
-$file = $container->getFile('/path/to/file.txt');
+```php
+use ArgentCrusade\Selectel\CloudStorage\Api\ApiClient;
+use ArgentCrusade\Selectel\CloudStorage\FluentFilesLoader;
+
+$api = new ApiClient('username', 'password');
+$filesLoader = new FluentFilesLoader($api, 'container-name', '/container-name');
+$files = $filesLoader->fromDirectory('photos')->limit(10)->asFileObjects()->get();
 ```
 
 ### File Uploads

@@ -85,6 +85,16 @@ class FluentFilesLoader implements FluentFilesLoaderContract, FilesTransformerCo
     }
 
     /**
+     * API Client.
+     *
+     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract
+     */
+    public function apiClient()
+    {
+        return $this->api;
+    }
+
+    /**
      * Container name.
      *
      * @return string
@@ -281,19 +291,34 @@ class FluentFilesLoader implements FluentFilesLoaderContract, FilesTransformerCo
         // in a specific directory, so they can provide only filename,
         // instead of sending full directory path with file marker.
 
-        if ($this->params['marker'] && $this->params['path']) {
-            $this->params['marker'] = $this->params['path'].'/'.ltrim($this->params['marker'], '/');
-        }
-
         // Also, if user is loading prefixed files from a directory
         // there's no need to send directory path with prefix. We
         // can append path to prefix and then reset path value.
 
-        if ($this->params['prefix'] && $this->params['path']) {
-            $this->params['prefix'] = $this->params['path'].'/'.ltrim($this->params['prefix']);
+        $this->appendPathToParam('marker')
+            ->appendPathToParam('prefix', true);
+
+        return $this->params;
+    }
+
+    /**
+     * @param string $key
+     * @param bool   $dropPath = false
+     *
+     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\FluentFilesLoaderContract
+     */
+    protected function appendPathToParam($key, $dropPath = false)
+    {
+        if (empty($this->params['path']) || empty($this->params[$key])) {
+            return $this;
+        }
+
+        $this->params[$key] = $this->params['path'].'/'.ltrim($this->params[$key], '/');
+
+        if ($dropPath) {
             $this->params['path'] = '';
         }
 
-        return $this->params;
+        return $this;
     }
 }

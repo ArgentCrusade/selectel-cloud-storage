@@ -12,6 +12,13 @@ interface FilesTransformerContract
     public function containerName();
 
     /**
+     * API Client.
+     *
+     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract
+     */
+    public function apiClient();
+
+    /**
      * Transforms file array to instance of File object.
      *
      * @param array $file File array.

@@ -117,6 +117,16 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
     }
 
     /**
+     * API Client.
+     *
+     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract
+     */
+    public function apiClient()
+    {
+        return $this->api;
+    }
+
+    /**
      * Returns JSON representation of container.
      *
      * @return array
