@@ -113,7 +113,7 @@ $file = $container->getFile('/path/to/file.txt');
 $container->delete();
 ```
 
-#### File Uploads
+### File Uploads
 `Container` class provides `uploadFromString` method to upload file contents and `uploadFromStream` method to upload file from stream.
 
 ```php
@@ -137,7 +137,7 @@ $params = [
 ```
 Also, `uploadFromString` method accepts 4th argument `bool $verifyChecksum`. If true, Selectel will perform MD5 checksum comparison and if something went wrong during upload process, it won't accept file and exception will be thrown. This option is enabled by default for `uploadFromString` method.
 
-#### File Instance
+### File Instance
 When you retrieve collection of files via `Contrainer::files` method you get array of arrays:
 
 ```php
