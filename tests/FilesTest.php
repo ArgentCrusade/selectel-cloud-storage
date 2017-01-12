@@ -43,6 +43,80 @@ class FilesTest extends PHPUnit_Framework_TestCase
     }
 
     /** @test */
+    function file_contents_can_be_retrieved_as_string()
+    {
+        $api = TestHelpers::mockApi(function ($api) {
+            $requests = [
+                $this->listContainersRequest(),
+                $this->listSingleFileRequest('container1', 'web/index.html', 'text/html'),
+            ];
+
+            foreach ($requests as $request) {
+                $api->shouldReceive('request')
+                    ->with($request['method'], $request['url'], $request['params'])
+                    ->andReturn($request['response']);
+            }
+
+            $readRequest = $this->readFileRequest('/container1/web/index.html');
+
+            $api->shouldReceive('request')
+                ->with($readRequest['method'], $readRequest['url'])
+                ->andReturn($readRequest['response']);
+        });
+
+        $storage = new CloudStorage($api);
+        $containers = $storage->containers();
+        $container = $containers->get('container1');
+
+        $file = $container->getFile('/web/index.html');
+        $expected = file_get_contents(__DIR__.'/fixtures/test.html');
+
+        $this->assertEquals($expected, $file->read());
+    }
+
+    /** @test */
+    function file_contents_can_be_retrieved_as_stream()
+    {
+        $api = TestHelpers::mockApi(function ($api) {
+            $requests = [
+                $this->listContainersRequest(),
+                $this->listSingleFileRequest('container1', 'web/index.html', 'text/html'),
+            ];
+
+            foreach ($requests as $request) {
+                $api->shouldReceive('request')
+                    ->with($request['method'], $request['url'], $request['params'])
+                    ->andReturn($request['response']);
+            }
+
+            $readRequest = $this->readFileRequest('/container1/web/index.html');
+
+            $api->shouldReceive('request')
+                ->with($readRequest['method'], $readRequest['url'])
+                ->andReturn($readRequest['response']);
+        });
+
+        $storage = new CloudStorage($api);
+        $containers = $storage->containers();
+        $container = $containers->get('container1');
+
+        $file = $container->getFile('/web/index.html');
+        $expected = file_get_contents(__DIR__.'/fixtures/test.html');
+        $buffer = '';
+        $stream = $file->readStream();
+
+        $this->assertInternalType('resource', $stream);
+
+        while (!feof($stream)) {
+            $buffer .= fread($stream, 1024);
+        }
+
+        fclose($stream);
+
+        $this->assertEquals($expected, $buffer);
+    }
+
+    /** @test */
     function file_can_be_renamed()
     {
         $api = TestHelpers::mockApi(function ($api) {
@@ -145,6 +219,15 @@ class FilesTest extends PHPUnit_Framework_TestCase
         $file->delete();
 
         $this->assertTrue($file->isDeleted());
+    }
+
+    public function readFileRequest($path)
+    {
+        return [
+            'method' => 'GET',
+            'url' => $path,
+            'response' => TestHelpers::toResponse(file_get_contents(__DIR__.'/fixtures/test.html')),
+        ];
     }
 
     public function copyFileRequest($source, $destination)

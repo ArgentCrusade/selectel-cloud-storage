@@ -5,6 +5,7 @@ namespace ArgentCrusade\Selectel\CloudStorage;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\FileContract;
 use ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException;
+use GuzzleHttp\Psr7\StreamWrapper;
 use InvalidArgumentException;
 use JsonSerializable;
 use LogicException;
@@ -183,6 +184,36 @@ class File implements FileContract, JsonSerializable
     public function isDeleted()
     {
         return $this->deleted === true;
+    }
+
+    /**
+     * Reads file contents.
+     *
+     * @return string
+     */
+    public function read()
+    {
+        $response = $this->api->request('GET', '/'.$this->container().'/'.ltrim($this->path(), '/'));
+
+        return (string) $response->getBody();
+    }
+
+    /**
+     * Reads file contents as stream.
+     *
+     * @param bool $psr7Stream = false
+     *
+     * @return resource | \Psr\Http\Message\StreamInterface
+     */
+    public function readStream($psr7Stream = false)
+    {
+        $response = $this->api->request('GET', '/'.$this->container().'/'.ltrim($this->path(), '/'));
+
+        if ($psr7Stream) {
+            return $response->getBody();
+        }
+
+        return StreamWrapper::getResource($response->getBody());
     }
 
     /**

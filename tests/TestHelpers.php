@@ -27,6 +27,6 @@ class TestHelpers
 
     public static function toResponse($body, $status = 200, array $headers = [])
     {
-        return new Response($status, $headers, json_encode($body));
+        return new Response($status, $headers, (!is_string($body) ? json_encode($body) : $body));
     }
 }

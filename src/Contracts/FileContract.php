@@ -84,6 +84,22 @@ interface FileContract
     public function isDeleted();
 
     /**
+     * Reads file contents.
+     *
+     * @return string
+     */
+    public function read();
+
+    /**
+     * Reads file contents as stream.
+     *
+     * @param bool $psr7Stream = false
+     *
+     * @return resource | \Psr\Http\Message\StreamInterface
+     */
+    public function readStream($psr7Stream = false);
+
+    /**
      * Rename file. New file name must be provided without path.
      *
      * @param string $name

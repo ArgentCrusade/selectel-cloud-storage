@@ -125,7 +125,7 @@ $etag = $container->uploadFromString('/path/to/file.txt', $contents);
 $stream = fopen('test.txt', 'r');
 $etag = $container->uploadFromStream('/path/to/file.txt', $stream);
 ```
-Both methods accepts `array $params` as third argument.
+Both methods accepts `array $params` as third optional argument.
 
 ```php
 $params = [
@@ -135,10 +135,11 @@ $params = [
     'deleteAt' => strtotime('next monday'), // File will be deleted at given UNIX timestamp.
 ];
 ```
-Also, `uploadFromString` method accepts 4th argument `bool $verifyChecksum`. If true, Selectel will perform MD5 checksum comparison and if something went wrong during upload process, it won't accept file and exception will be thrown.
+Also, `uploadFromString` method accepts 4th argument `bool $verifyChecksum`. If true, Selectel will perform MD5 checksum comparison and if something went wrong during upload process, it won't accept file and exception will be thrown. This option is enabled by default for `uploadFromString` method.
 
 #### File Instance
 When you retrieve collection of files via `Contrainer::files` method you get array of arrays:
+
 ```php
 $files = $container->files();
 $firstFile = $files->get(0);
@@ -154,6 +155,7 @@ $firstFile will be something like this:
 ]
 */
 ```
+
 But when you're using `Container::getFile` method, you receive instance of `ArgentCrusade\Selectel\CloudStorage\File` class that implements `JsonSerializable` interface. With this object you can perform operations such as renaming, copying and deleting file.
 
 ```php
@@ -170,6 +172,13 @@ $lastModifiedAt = $file->lastModifiedAt(); // '2013-05-27T14:42:04.669760'
 $etag = $file->etag(); // md5 hash of file contents.
 $isDeleted = $file->isDeleted(); // Becomes true only after deletion operation.
 $json = json_encode($file); // JSON representation of file.
+
+// Read file.
+$contents = $file->read(); // Read file and return string.
+$resource = $file->readStream(); // Read file and return stream resource.
+
+// If you need PSR-7's StreamInterface instead of resource, provide $psr7Stream = true argument to File::readStream method:
+$psr7Stream = $file->readStream(true); // Instance of \Psr\Http\Message\StreamInterface
 
 // Rename file.
 $file->rename('new-name.txt'); // File will be placed in the same directory.
