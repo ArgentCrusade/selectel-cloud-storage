@@ -19,33 +19,6 @@ interface ContainerContract
     public function type();
 
     /**
-     * Determines if container is public.
-     *
-     * @return bool
-     */
-    public function isPublic();
-
-    /**
-     * Determines if container is private.
-     *
-     * @return bool
-     */
-    public function isPrivate();
-
-    /**
-     * Retrieves files from current container.
-     *
-     * @param string $directory        = null
-     * @param string $prefixOrFullPath = null
-     * @param string $delimiter        = null
-     * @param int    $limit            = 10000
-     * @param string $marker           = ''
-     *
-     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\Collections\CollectionContract
-     */
-    public function files($directory = null, $prefixOrFullPath = null, $delimiter = null, $limit = 10000, $marker = '');
-
-    /**
      * Container files count.
      *
      * @return int
@@ -74,6 +47,108 @@ interface ContainerContract
     public function downloadedBytes();
 
     /**
+     * Determines if container is public.
+     *
+     * @return bool
+     */
+    public function isPublic();
+
+    /**
+     * Determines if container is private.
+     *
+     * @return bool
+     */
+    public function isPrivate();
+
+    /**
+     * Determines if container is a gallery container.
+     *
+     * @return bool
+     */
+    public function isGallery();
+
+    /**
+     * Sets container type to 'public'.
+     *
+     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
+     *
+     * @return string
+     */
+    public function setPublic();
+
+    /**
+     * Sets container type to 'private'.
+     *
+     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
+     *
+     * @return string
+     */
+    public function setPrivate();
+
+    /**
+     * Sets container type to 'gallery'.
+     *
+     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
+     *
+     * @return string
+     */
+    public function setGallery();
+
+    /**
+     * Creates new Fluent files loader instance.
+     *
+     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\FluentFilesLoaderContract
+     */
+    public function files();
+
+    /**
+     * Determines whether file exists or not.
+     *
+     * @param string $path File path.
+     *
+     * @return bool
+     */
+    public function fileExists($path);
+
+    /**
+     * Retrieves file object container. This method does not actually download file, see File::download.
+     *
+     * @param string $path
+     *
+     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\FileNotFoundException
+     *
+     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\FileContract
+     */
+    public function getFile($path);
+
+    /**
+     * Transforms file array to instance of File object.
+     *
+     * @param array $file File array.
+     *
+     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\FileContract
+     */
+    public function getFileFromArray(array $file);
+
+    /**
+     * Creates new directory.
+     *
+     * @param string $name Directory name.
+     *
+     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
+     *
+     * @return string
+     */
+    public function createDir($name);
+
+    /**
+     * Deletes directory.
+     *
+     * @param string $name Directory name.
+     */
+    public function deleteDir($name);
+
+    /**
      * Uploads file contents from string. Returns ETag header value if upload was successful.
      *
      * @param string $path           Remote path.
@@ -99,17 +174,6 @@ interface ContainerContract
      * @return string
      */
     public function uploadFromStream($path, $resource, array $params = []);
-
-    /**
-     * Retrieves file object container. This method does not actually download file, see File::download.
-     *
-     * @param string $path
-     *
-     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\FileNotFoundException
-     *
-     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\FileContract
-     */
-    public function getFile($path);
 
     /**
      * Deletes container. Container must be empty in order to perform this operation.

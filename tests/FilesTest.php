@@ -10,7 +10,7 @@ class FilesTest extends PHPUnit_Framework_TestCase
     }
 
     /** @test */
-    function file_can_retrieved_from_container()
+    function file_can_be_retrieved_from_container()
     {
         $api = TestHelpers::mockApi(function ($api) {
             $requests = [
@@ -319,7 +319,7 @@ class FilesTest extends PHPUnit_Framework_TestCase
             'url' => '/'.$container,
             'params' => [
                 'query' => [
-                    'limit' => 10000,
+                    'limit' => 1,
                     'marker' => '',
                     'path' => '',
                     'prefix' => $path,

@@ -164,7 +164,7 @@ class Collection implements CollectionContract, ArrayAccess, Countable, Iterator
      */
     public function next()
     {
-        $this->position += 1;
+        $this->position++;
     }
 
     /**
@@ -174,6 +174,10 @@ class Collection implements CollectionContract, ArrayAccess, Countable, Iterator
      */
     public function valid()
     {
+        if (!isset($this->keys[$this->position])) {
+            return false;
+        }
+
         $currentKey = $this->keys[$this->position];
 
         return isset($this->items[$currentKey]);

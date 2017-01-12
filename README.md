@@ -86,31 +86,70 @@ $uploadedBytes = $container->uploadedBytes(); // Total number of bytes uploaded 
 $downloadedBytes = $container->downloadedBytes(); // Total number of bytes downloaded from container (tx_bytes).
 $json = json_encode($container); // JSON representation of container.
 
-// Helpers.
+// Container types.
 $isPublicContainer = $container->isPublic(); // true or false.
 $isPrivateContainer = $container->isPrivate(); // true or false.
+$isGalleryContainer = $container->isGallery(); // true or false.
 
-// Files.
-// All files (first 10000 by default).
-$files = $container->files();
-
-// Files from specific directory.
-$filesFromDirectory = $container->files('/directory/path');
-
-// Files that satisfies given prefix.
-// Useful for retrieving files with same name pattern:
-// image-001.jpg, image-002.jpg, image-003.jpg, etc.
-$filesWithPrefix = $container->files(null, '/directory/image-');
-
-// Exact file.
-$exactFile = $container->files(null, '/path/to/file.txt'); // Collection of 1 file.
-
-// Get single file instance.
-$file = $container->getFile('/path/to/file.txt');
+// Change container type.
+$container->setPublic(); // Set container visiblity to 'public'.
+$container->setPrivate(); // Set container visibility to 'private'.
+$container->setGallery(); // Set special 'gallery' type (container will become public as well).
 
 // Delete container.
 // Note: container must be empty!
 $container->delete();
+```
+
+### Fluent Files Loader
+You can use instance of `ArgentCrusade\Selectel\CloudStorage\FluentFilesLoader` class to retrieve files from container.
+Fluent loader returns `Collection` of file arrays or `Collection` of `File` objects.
+
+This instance is accesible from `$container->files()` method and allows you to do following things:
+
+```php
+// All files (first 10000 by default).
+$files = $container->files()->get(); // or $container->files()->all();
+
+// Files from specific directory.
+$filesFromDirectory = $container->files()->fromDirectory('/directory')->get();
+
+// Files that satisfies given prefix.
+// Useful for retrieving files with same name pattern:
+// image-001.jpg, image-002.jpg, image-003.jpg, etc.
+$filesWithPrefix = $container->files()->withPrefix('image-')->get();
+
+// You can also combine fromDirectory() and withPrefix() methods to load prefixed files
+// from a specific directory:
+$filesFromDirectoryWithPrefix = $container->files()->fromDirectory('/directory')->withPrefix('image-')->get();
+
+// You can apply limit/marker values to any results set (before calling get() method).
+// Marker file is a filename of last file from previous request (pagination).
+// If you have 100 files with names like 'image-001.jpg', 'image-002.jpg', ... , 'image-100.jpg'
+// and you need to load 50 files from 'image-051.jpg', you can do this:
+$files = $container->files()
+    ->fromDirectory('photos')
+    ->withPrefix('image-')
+    ->limit(50, 'image-050.jpg')
+    ->get();
+
+// Note: if you're working inside a directory (fromDirectory('photos')), then you can omit
+// its path when using withPrefix() or marker file. If you're not in a directory, then
+// full path to prefixed files and/or marker file is required.
+$container->files()->fromDirectory('photos')->withPrefix('image-')->get(); // Full path is not required in withPrefix() method
+$container->files()->withPrefix('photos/image-')->get(); // Full path is required.
+
+// Use asFileObjects() method in chain to return Collection of File objects:
+$files = $container->files()->fromDirectory('photos')->asFileObjects()->get();
+$files[0]->name(); // First file's name.
+
+// Warning: converting a lot of files to `File` instances may result in performance loss.
+
+// Check if file exists.
+$fileExists = $container->fileExists('/path/to/file.txt'); // true or false.
+
+// Get single file instance.
+$file = $container->getFile('/path/to/file.txt');
 ```
 
 ### File Uploads
@@ -138,10 +177,10 @@ $params = [
 Also, `uploadFromString` method accepts 4th argument `bool $verifyChecksum`. If true, Selectel will perform MD5 checksum comparison and if something went wrong during upload process, it won't accept file and exception will be thrown. This option is enabled by default for `uploadFromString` method.
 
 ### File Instance
-When you retrieve collection of files via `Contrainer::files` method you get array of arrays:
+When you retrieve collection of files via `Contrainer::files` method you get `Collection` of file arrays:
 
 ```php
-$files = $container->files();
+$files = $container->files()->get();
 $firstFile = $files->get(0);
 /*
 $firstFile will be something like this:
@@ -151,7 +190,8 @@ $firstFile will be something like this:
     'content_type' => 'text/html',
     'hash' => 'b302ffc3b75770453e96c1348e30eb93',
     'last_modified': "2013-05-27T14:42:04.669760",
-    'name': "my_index.html",
+    'name': 'path/to/my_index.html',
+    'filename': 'my_index.html'
 ]
 */
 ```
@@ -194,6 +234,30 @@ $file->copy('/path/to/file.txt', 'my-second-container');
 // any of operations listed above (except $file->isDeleted() one).
 $file->delete();
 ```
+
+If you need to transform file from array to `File` instance you can use `Container::getFileFromArray` method:
+```php
+$files = $container->files()->get();
+$file = $container->getFileFromArray($files[0]);
+```
+
+Also, you can use `Container::getFilesCollectionFromArrays` method to convert files `Collection` or array of file arrays to `Collection` of `File` instances:
+```php
+$files = $container->files()->get();
+
+$filesCollection = $container->getFilesCollectionFromArrays($files);
+$filesCollection[0]->name(); // Returns first file's name.
+// Same as:
+$filesCollection = $container->getFilesCollectionFromArrays([
+	$files[0], $files[1],
+]);
+$filesCollection[0]->name(); // Returns first file's name.
+```
+
+Fluent loader (`FluentFilesLoader`) can also return `Collection` of file objects by calling `asFileObjects` method before `get` method (see [Fluent Files Loader section](#fluent-files-loader)).
+
+
+***Warning***: converting a lot of files to `File` instances may result in performance loss.
 
 ## Change log
 

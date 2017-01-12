@@ -93,9 +93,126 @@ class ContainersTest extends PHPUnit_Framework_TestCase
         $storage = new CloudStorage($api);
         $containers = $storage->containers();
         $container = $containers->get('container1');
-        $files = $container->files();
+        $files = $container->files()->get();
 
         $this->assertEquals(3, count($files));
+    }
+
+    /** @test */
+    function container_can_transform_file_array_to_file_object()
+    {
+        $api = TestHelpers::mockApi(function ($api) {
+            $requests = [
+                $this->listContainersRequest(),
+                $this->listFilesRequest('container1'),
+            ];
+
+            foreach ($requests as $request) {
+                $api->shouldReceive('request')
+                    ->with($request['method'], $request['url'], $request['params'])
+                    ->andReturn($request['response']);
+            }
+        });
+
+        $storage = new CloudStorage($api);
+        $containers = $storage->containers();
+        $container = $containers->get('container1');
+        $files = $container->files()->get();
+
+        $firstFile = $files[0];
+
+        $file = $container->getFileFromArray($firstFile);
+
+        $this->assertEquals($firstFile['filename'], $file->name());
+        $this->assertEquals($firstFile['name'], $file->path());
+        $this->assertEquals($firstFile['bytes'], $file->size());
+        $this->assertEquals($firstFile['content_type'], $file->contentType());
+    }
+
+    /** @test */
+    function container_can_transform_collection_of_file_arrays_to_collection_of_file_objects()
+    {
+        $api = TestHelpers::mockApi(function ($api) {
+            $requests = [
+                $this->listContainersRequest(),
+                $this->listFilesRequest('container1'),
+            ];
+
+            foreach ($requests as $request) {
+                $api->shouldReceive('request')
+                    ->with($request['method'], $request['url'], $request['params'])
+                    ->andReturn($request['response']);
+            }
+        });
+
+        $storage = new CloudStorage($api);
+        $containers = $storage->containers();
+        $container = $containers->get('container1');
+        $files = $container->files()->get();
+        $filesCollection = $container->getFilesCollectionFromArrays($files);
+
+        foreach ($files as $index => $file) {
+            $this->assertEquals($file['filename'], $filesCollection[$index]->name());
+            $this->assertEquals($file['name'], $filesCollection[$index]->path());
+            $this->assertEquals($file['bytes'], $filesCollection[$index]->size());
+            $this->assertEquals($file['content_type'], $filesCollection[$index]->contentType());
+        }
+    }
+
+    /** @test */
+    function container_can_transform_array_of_file_arrays_to_collection_of_file_objects()
+    {
+        $api = TestHelpers::mockApi(function ($api) {
+            $requests = [
+                $this->listContainersRequest(),
+                $this->listFilesRequest('container1'),
+            ];
+
+            foreach ($requests as $request) {
+                $api->shouldReceive('request')
+                    ->with($request['method'], $request['url'], $request['params'])
+                    ->andReturn($request['response']);
+            }
+        });
+
+        $storage = new CloudStorage($api);
+        $containers = $storage->containers();
+        $container = $containers->get('container1');
+        $files = $container->files()->get();
+
+        $filesCollection = $container->getFilesCollectionFromArrays([
+            $files[0], $files[1], $files[2],
+        ]);
+
+        foreach ($files as $index => $file) {
+            $this->assertEquals($file['filename'], $filesCollection[$index]->name());
+            $this->assertEquals($file['name'], $filesCollection[$index]->path());
+            $this->assertEquals($file['bytes'], $filesCollection[$index]->size());
+            $this->assertEquals($file['content_type'], $filesCollection[$index]->contentType());
+        }
+    }
+
+    /** @test */
+    function container_can_check_if_file_exists()
+    {
+        $api = TestHelpers::mockApi(function ($api) {
+            $requests = [
+                $this->listContainersRequest(),
+                $this->getFileExistsRequest('container1', 'test.txt'),
+            ];
+
+            foreach ($requests as $request) {
+                $api->shouldReceive('request')
+                    ->with($request['method'], $request['url'], $request['params'])
+                    ->andReturn($request['response']);
+            }
+        });
+
+        $storage = new CloudStorage($api);
+        $containers = $storage->containers();
+        $container = $containers->get('container1');
+
+        $this->assertTrue($container->fileExists('test.txt'));
     }
 
     /** @test */
@@ -119,6 +236,44 @@ class ContainersTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1024, $container->size());
         $this->assertEquals(2048, $container->uploadedBytes());
         $this->assertEquals(1024, $container->downloadedBytes());
+    }
+
+    /** @test */
+    function container_can_update_its_type()
+    {
+        $api = TestHelpers::mockApi(function ($api) {
+            $containerRequest = $this->getContainerRequest('container1');
+
+            $api->shouldReceive('request')
+                ->with($containerRequest['method'], $containerRequest['url'])
+                ->andReturn($containerRequest['response']);
+
+            $requests = [
+                $this->getSetContainerTypeRequest('container1', 'private'),
+                $this->getSetContainerTypeRequest('container1', 'gallery'),
+                $this->getSetContainerTypeRequest('container1', 'public'),
+            ];
+
+            foreach ($requests as $request) {
+                $api->shouldReceive('request')
+                    ->with($request['method'], $request['url'], $request['params'])
+                    ->andReturn($request['response']);
+            }
+        });
+
+        $storage = new CloudStorage($api);
+        $container = $storage->getContainer('container1');
+
+        $this->assertTrue($container->isPublic());
+
+        $container->setPrivate();
+        $this->assertTrue($container->isPrivate());
+
+        $container->setGallery();
+        $this->assertTrue($container->isGallery());
+
+        $container->setPublic();
+        $this->assertTrue($container->isPublic());
     }
 
     /** @test */
@@ -241,6 +396,46 @@ class ContainersTest extends PHPUnit_Framework_TestCase
         $storage = new CloudStorage($api);
         $container = $storage->getContainer('container1');
         $container->delete();
+    }
+
+    public function getFileExistsRequest($container, $file)
+    {
+        return [
+            'method' => 'GET',
+            'url' => '/'.$container,
+            'params' => [
+                'query' => [
+                    'limit' => 1,
+                    'marker' => '',
+                    'path' => '',
+                    'prefix' => $file,
+                    'delimiter' => '',
+                ],
+            ],
+            'response' => TestHelpers::toResponse([
+                [
+                    'bytes' => 59392,
+                    'content_type' => 'image/jpeg',
+                    'hash' => '37c05df3550d4565537e4cf14281d1a5',
+                    'last_modified' => '2013-05-27T15:31:25.325041',
+                    'name' => $file,
+                ],
+            ]),
+        ];
+    }
+
+    public function getSetContainerTypeRequest($name, $type)
+    {
+        return [
+            'method' => 'POST',
+            'url' => '/'.$name,
+            'params' => [
+                'headers' => [
+                    'X-Container-Meta-Type' => $type,
+                ],
+            ],
+            'response' => TestHelpers::toResponse('', 202, []),
+        ];
     }
 
     public function getDirectoryCreateRequest($path)

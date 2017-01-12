@@ -5,15 +5,19 @@ namespace ArgentCrusade\Selectel\CloudStorage;
 use ArgentCrusade\Selectel\CloudStorage\Collections\Collection;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\ContainerContract;
+use ArgentCrusade\Selectel\CloudStorage\Contracts\FilesTransformerContract;
 use ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException;
 use ArgentCrusade\Selectel\CloudStorage\Exceptions\FileNotFoundException;
 use ArgentCrusade\Selectel\CloudStorage\Exceptions\UploadFailedException;
+use ArgentCrusade\Selectel\CloudStorage\Traits\FilesTransformer;
 use Countable;
 use JsonSerializable;
 use LogicException;
 
-class Container implements ContainerContract, Countable, JsonSerializable
+class Container implements ContainerContract, FilesTransformerContract, Countable, JsonSerializable
 {
+    use FilesTransformer;
+
     /**
      * @var \ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract $api
      */
@@ -24,7 +28,7 @@ class Container implements ContainerContract, Countable, JsonSerializable
      *
      * @var string
      */
-    protected $name;
+    protected $containerName;
 
     /**
      * Container data.
@@ -48,7 +52,7 @@ class Container implements ContainerContract, Countable, JsonSerializable
     public function __construct(ApiClientContract $api, $name, array $data = [])
     {
         $this->api = $api;
-        $this->name = $name;
+        $this->containerName = $name;
         $this->data = $data;
         $this->dataLoaded = !empty($data);
     }
@@ -113,13 +117,40 @@ class Container implements ContainerContract, Countable, JsonSerializable
     }
 
     /**
+     * Returns JSON representation of container.
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'name' => $this->name(),
+            'type' => $this->type(),
+            'files_count' => $this->filesCount(),
+            'size' => $this->size(),
+            'uploaded_bytes' => $this->uploadedBytes(),
+            'downloaded_bytes' => $this->downloadedBytes(),
+        ];
+    }
+
+    /**
      * Container name.
      *
      * @return string
      */
     public function name()
     {
-        return $this->name;
+        return $this->containerName();
+    }
+
+    /**
+     * Container name.
+     *
+     * @return string
+     */
+    public function containerName()
+    {
+        return $this->containerName;
     }
 
     /**
@@ -183,23 +214,6 @@ class Container implements ContainerContract, Countable, JsonSerializable
     }
 
     /**
-     * Returns JSON representation of container.
-     *
-     * @return array
-     */
-    public function jsonSerialize()
-    {
-        return [
-            'name' => $this->name(),
-            'type' => $this->type(),
-            'files_count' => $this->filesCount(),
-            'size' => $this->size(),
-            'uploaded_bytes' => $this->uploadedBytes(),
-            'downloaded_bytes' => $this->downloadedBytes(),
-        ];
-    }
-
-    /**
      * Determines if container is public.
      *
      * @return bool
@@ -216,62 +230,117 @@ class Container implements ContainerContract, Countable, JsonSerializable
      */
     public function isPrivate()
     {
-        return !$this->isPublic();
+        return $this->type() == 'private';
     }
 
     /**
-     * Retrieves files from current container.
+     * Determines if container is a gallery container.
      *
-     * @param string $directory        = null
-     * @param string $prefixOrFullPath = null
-     * @param string $delimiter        = null
-     * @param int    $limit            = 10000
-     * @param string $marker           = ''
-     *
-     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\Collections\CollectionContract
+     * @return bool
      */
-    public function files($directory = null, $prefixOrFullPath = null, $delimiter = null, $limit = 10000, $marker = '')
+    public function isGallery()
     {
-        $response = $this->api->request('GET', $this->absolutePath(), [
-            'query' => [
-                'limit' => intval($limit),
-                'marker' => $marker,
-                'path' => !is_null($directory) ? ltrim($directory, '/') : '',
-                'prefix' => !is_null($prefixOrFullPath) ? ltrim($prefixOrFullPath, '/') : '',
-                'delimiter' => !is_null($delimiter) ? $delimiter : '',
+        return $this->type() == 'gallery';
+    }
+
+    /**
+     * Sets container type to 'public'.
+     *
+     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
+     *
+     * @return string
+     */
+    public function setPublic()
+    {
+        return $this->setType('public');
+    }
+
+    /**
+     * Sets container type to 'private'.
+     *
+     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
+     *
+     * @return string
+     */
+    public function setPrivate()
+    {
+        return $this->setType('private');
+    }
+
+    /**
+     * Sets container type to 'gallery'.
+     *
+     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
+     *
+     * @return string
+     */
+    public function setGallery()
+    {
+        return $this->setType('gallery');
+    }
+
+    /**
+     * Updates container type.
+     *
+     * @param string $type Container type, 'public', 'private' or 'gallery'.
+     *
+     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
+     *
+     * @return string
+     */
+    protected function setType($type)
+    {
+        if ($this->type() === $type) {
+            return $type;
+        }
+
+        $response = $this->api->request('POST', $this->absolutePath(), [
+            'headers' => [
+                'X-Container-Meta-Type' => $type,
             ],
         ]);
 
-        if ($response->getStatusCode() !== 200) {
-            throw new ApiRequestFailedException('Unable to list container files.', $response->getStatusCode());
+        if ($response->getStatusCode() !== 202) {
+            throw new ApiRequestFailedException('Unable to set container type to "'.$type.'".', $response->getStatusCode());
         }
 
-        return new Collection(json_decode($response->getBody(), true));
+        return $this->data['type'] = $type;
     }
 
     /**
-     * Retrieves file object container. This method does not actually download file, see File::download.
+     * Creates new Fluent files loader instance.
+     *
+     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\FluentFilesLoaderContract
+     */
+    public function files()
+    {
+        return new FluentFilesLoader($this->api, $this->name(), $this->absolutePath());
+    }
+
+    /**
+     * Determines whether file exists or not.
+     *
+     * @param string $path File path.
+     *
+     * @return bool
+     */
+    public function fileExists($path)
+    {
+        return $this->files()->exists($path);
+    }
+
+    /**
+     * Retrieves file object container. This method does not actually download file, see File::read or File::readStream.
      *
      * @param string $path
      *
      * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\FileNotFoundException
-     * @throws \LogicException
      *
      * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\FileContract
      */
     public function getFile($path)
     {
-        $files = $this->files(null, $path);
-
-        if (!count($files)) {
-            throw new FileNotFoundException('File "'.$path.'" was not found in container "'.$this->name().'".');
-        }
-
-        if (count($files) > 1) {
-            throw new LogicException('There is more than one file that satisfies given path "'.$path.'".');
-        }
-
-        return new File($this->api, $this->name(), $files->get(0));
+        return $this->files()->find($path);
     }
 
     /**
