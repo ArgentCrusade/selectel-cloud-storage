@@ -107,7 +107,7 @@ interface ContainerContract
      *
      * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\FileNotFoundException
      *
-     * @return \FileContract
+     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\FileContract
      */
     public function getFile($path);
 

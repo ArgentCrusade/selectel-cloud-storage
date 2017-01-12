@@ -40,6 +40,7 @@ class File implements FileContract, JsonSerializable
 
     /**
      * @param \ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract $api
+     * @param string                                                               $container
      * @param array                                                                $data
      */
     public function __construct(ApiClientContract $api, $container, array $data)
@@ -101,10 +102,6 @@ class File implements FileContract, JsonSerializable
     {
         $path = explode('/', $this->path());
 
-        if (!count($path)) {
-            return;
-        }
-
         array_pop($path);
 
         return implode('/', $path);
@@ -120,10 +117,6 @@ class File implements FileContract, JsonSerializable
     public function name()
     {
         $path = explode('/', $this->path());
-
-        if (!count($path)) {
-            return;
-        }
 
         return array_pop($path);
     }

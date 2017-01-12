@@ -195,11 +195,19 @@ $file->copy('/path/to/file.txt', 'my-second-container');
 $file->delete();
 ```
 
+## Change log
+
+Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+
 ## Testing
 
 ``` bash
 $ vendor/bin/phpunit
 ```
+
+## Contributing
+
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Security
 

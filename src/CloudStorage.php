@@ -35,7 +35,7 @@ class CloudStorage implements CloudStorageContract
      *
      * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
      *
-     * @return \ContainersCollectionContract
+     * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\Collections\CollectionContract
      */
     public function containers($limit = 10000, $marker = '')
     {

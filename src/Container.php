@@ -42,6 +42,7 @@ class Container implements ContainerContract, Countable, JsonSerializable
 
     /**
      * @param \ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract $api
+     * @param string                                                               $name
      * @param array                                                                $data
      */
     public function __construct(ApiClientContract $api, $name, array $data = [])
@@ -275,19 +276,7 @@ class Container implements ContainerContract, Countable, JsonSerializable
      */
     public function uploadFromString($path, $contents, array $params = [], $verifyChecksum = true)
     {
-        $headers = $this->convertUploadParamsToHeaders($contents, $params, $verifyChecksum);
-        $url = $this->normalizeUploadPath($path);
-
-        $response = $this->api->request('PUT', $url, [
-            'headers' => $headers,
-            'body' => $contents,
-        ]);
-
-        if ($response->getStatusCode() !== 201) {
-            throw new UploadFailedException('Unable to upload file from string.', $response->getStatusCode());
-        }
-
-        return $response->getHeaderLine('ETag');
+        return $this->uploadFrom($path, $contents, $params, $verifyChecksum);
     }
 
     /**
@@ -303,59 +292,44 @@ class Container implements ContainerContract, Countable, JsonSerializable
      */
     public function uploadFromStream($path, $resource, array $params = [])
     {
-        $headers = $this->convertUploadParamsToHeaders(null, $params, false);
+        return $this->uploadFrom($path, $resource, $params, false);
+    }
+
+    /**
+     * Upload file from string or stream resource.
+     *
+     * @param string            $path           Remote path.
+     * @param string | resource $contents       File contents.
+     * @param array             $params         = [] Upload params.
+     * @param bool              $verifyChecksum = true
+     *
+     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\UploadFailedException
+     *
+     * @return string
+     */
+    protected function uploadFrom($path, $contents, array $params = [], $verifyChecksum = true)
+    {
+        $headers = $this->convertUploadParamsToHeaders($contents, $params, $verifyChecksum);
         $url = $this->normalizeUploadPath($path);
 
         $response = $this->api->request('PUT', $url, [
             'headers' => $headers,
-            'body' => $resource,
+            'body' => $contents,
         ]);
 
         if ($response->getStatusCode() !== 201) {
-            throw new UploadFailedException('Unable to upload file from stream.', $response->getStatusCode());
+            throw new UploadFailedException('Unable to upload file.', $response->getStatusCode());
         }
 
         return $response->getHeaderLine('ETag');
     }
 
     /**
-     * Deletes container. Container must be empty in order to perform this operation.
-     *
-     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
-     */
-    public function delete()
-    {
-        $response = $this->api->request('DELETE', '/'.$this->name());
-
-        switch ($response->getStatusCode()) {
-            case 204:
-                // Container removed.
-                return;
-            case 404:
-                throw new ApiRequestFailedException('Container "'.$this->name().'" was not found.');
-            case 409:
-                throw new ApiRequestFailedException('Container must be empty.');
-        }
-    }
-
-    /**
-     * Normalizes upload path.
-     *
-     * @param string $path Remote path (without container name).
-     *
-     * @return string
-     */
-    protected function normalizeUploadPath($path)
-    {
-        return '/'.$this->name().'/'.ltrim($path, '/');
-    }
-
-    /**
      * Parses upload parameters and assigns them to appropriate HTTP headers.
      *
-     * @param mixed $contents       = null
-     * @param array $params         = []
-     * @param bool  $verifyChecksum = true
+     * @param string $contents       = null
+     * @param array  $params         = []
+     * @param bool   $verifyChecksum = true
      *
      * @return array
      */
@@ -381,5 +355,37 @@ class Container implements ContainerContract, Countable, JsonSerializable
         }
 
         return $headers;
+    }
+
+    /**
+     * Normalizes upload path.
+     *
+     * @param string $path Remote path (without container name).
+     *
+     * @return string
+     */
+    protected function normalizeUploadPath($path)
+    {
+        return '/'.$this->name().'/'.ltrim($path, '/');
+    }
+
+    /**
+     * Deletes container. Container must be empty in order to perform this operation.
+     *
+     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
+     */
+    public function delete()
+    {
+        $response = $this->api->request('DELETE', '/'.$this->name());
+
+        switch ($response->getStatusCode()) {
+            case 204:
+                // Container removed.
+                return;
+            case 404:
+                throw new ApiRequestFailedException('Container "'.$this->name().'" was not found.');
+            case 409:
+                throw new ApiRequestFailedException('Container must be empty.');
+        }
     }
 }
