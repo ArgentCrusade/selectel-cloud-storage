@@ -58,7 +58,7 @@ class Collection implements CollectionContract, ArrayAccess, Countable, Iterator
      *
      * @param mixed $key
      *
-     * @return mixed | null
+     * @return mixed|null
      */
     public function get($key)
     {
@@ -110,7 +110,7 @@ class Collection implements CollectionContract, ArrayAccess, Countable, Iterator
      *
      * @param mixed $offset
      *
-     * @return mixed | null
+     * @return mixed|null
      */
     public function offsetGet($offset)
     {
@@ -140,7 +140,7 @@ class Collection implements CollectionContract, ArrayAccess, Countable, Iterator
     /**
      * Current iterator item.
      *
-     * @return mixed | null
+     * @return mixed|null
      */
     public function current()
     {
@@ -183,6 +183,11 @@ class Collection implements CollectionContract, ArrayAccess, Countable, Iterator
         return isset($this->items[$currentKey]);
     }
 
+    /**
+     * JSON representation of collection.
+     *
+     * @return array
+     */
     public function jsonSerialize()
     {
         return $this->items;

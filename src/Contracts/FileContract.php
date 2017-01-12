@@ -9,7 +9,7 @@ interface FileContract
      *
      * @throws \LogicException
      *
-     * @return string | null
+     * @return string
      */
     public function container();
 
@@ -18,7 +18,7 @@ interface FileContract
      *
      * @throws \LogicException
      *
-     * @return string | null
+     * @return string
      */
     public function path();
 
@@ -27,7 +27,7 @@ interface FileContract
      *
      * @throws \LogicException
      *
-     * @return string | null
+     * @return string
      */
     public function directory();
 
@@ -36,7 +36,7 @@ interface FileContract
      *
      * @throws \LogicException
      *
-     * @return string | null
+     * @return string
      */
     public function name();
 
@@ -54,7 +54,7 @@ interface FileContract
      *
      * @throws \LogicException
      *
-     * @return string | null
+     * @return string
      */
     public function contentType();
 
@@ -63,7 +63,7 @@ interface FileContract
      *
      * @throws \LogicException
      *
-     * @return string | null
+     * @return string
      */
     public function lastModifiedAt();
 
@@ -72,7 +72,7 @@ interface FileContract
      *
      * @throws \LogicException
      *
-     * @return string | null
+     * @return string
      */
     public function etag();
 

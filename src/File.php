@@ -58,7 +58,7 @@ class File implements FileContract, JsonSerializable
      *
      * @throws \LogicException
      *
-     * @return mixed | null
+     * @return mixed|null
      */
     protected function fileData($key, $default = null)
     {
@@ -88,7 +88,7 @@ class File implements FileContract, JsonSerializable
      *
      * @throws \LogicException
      *
-     * @return string | null
+     * @return string
      */
     public function container()
     {
@@ -100,7 +100,7 @@ class File implements FileContract, JsonSerializable
      *
      * @throws \LogicException
      *
-     * @return string | null
+     * @return string
      */
     public function path()
     {
@@ -112,7 +112,7 @@ class File implements FileContract, JsonSerializable
      *
      * @throws \LogicException
      *
-     * @return string | null
+     * @return string
      */
     public function directory()
     {
@@ -128,7 +128,7 @@ class File implements FileContract, JsonSerializable
      *
      * @throws \LogicException
      *
-     * @return string | null
+     * @return string
      */
     public function name()
     {
@@ -154,7 +154,7 @@ class File implements FileContract, JsonSerializable
      *
      * @throws \LogicException
      *
-     * @return string | null
+     * @return string
      */
     public function contentType()
     {
@@ -166,7 +166,7 @@ class File implements FileContract, JsonSerializable
      *
      * @throws \LogicException
      *
-     * @return string | null
+     * @return string
      */
     public function lastModifiedAt()
     {
@@ -178,7 +178,7 @@ class File implements FileContract, JsonSerializable
      *
      * @throws \LogicException
      *
-     * @return string | null
+     * @return string
      */
     public function etag()
     {
@@ -335,7 +335,7 @@ class File implements FileContract, JsonSerializable
     }
 
     /**
-     * Returns JSON representation of file.
+     * JSON representation of file.
      *
      * @return array
      */

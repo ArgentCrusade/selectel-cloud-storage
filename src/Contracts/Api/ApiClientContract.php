@@ -16,18 +16,25 @@ interface ApiClientContract
     public function setHttpClient(ClientInterface $httpClient);
 
     /**
-     * Returns HTTP Client instance.
+     * HTTP Client.
      *
-     * @return \GuzzleHttp\ClientInterface | null
+     * @return \GuzzleHttp\ClientInterface|null
      */
     public function getHttpClient();
 
     /**
-     * Returns authenticated user's token.
+     * Authenticated user's token.
      *
-     * @return string | null
+     * @return string
      */
     public function token();
+
+    /**
+     * Storage URL.
+     *
+     * @return string
+     */
+    public function storageUrl();
 
     /**
      * Determines if user is authenticated.
@@ -39,6 +46,7 @@ interface ApiClientContract
     /**
      * Performs new API request. $params array will be passed to Guzzle as is.
      *
+     * @param string $method
      * @param string $url
      * @param array  $params = []
      *

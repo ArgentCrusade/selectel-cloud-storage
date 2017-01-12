@@ -75,9 +75,9 @@ class ApiClient implements ApiClientContract
     }
 
     /**
-     * Returns HTTP Client instance.
+     * HTTP Client.
      *
-     * @return \GuzzleHttp\ClientInterface | null
+     * @return \GuzzleHttp\ClientInterface|null
      */
     public function getHttpClient()
     {
@@ -94,15 +94,20 @@ class ApiClient implements ApiClientContract
     }
 
     /**
-     * Returns authenticated user's token.
+     * Authenticated user's token.
      *
-     * @return string | null
+     * @return string
      */
     public function token()
     {
         return $this->token;
     }
 
+    /**
+     * Storage URL.
+     *
+     * @return string
+     */
     public function storageUrl()
     {
         return $this->storageUrl;
@@ -121,7 +126,8 @@ class ApiClient implements ApiClientContract
     /**
      * Performs authentication request.
      *
-     * @throws \AuthenticationFailedException
+     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\AuthenticationFailedException
+     * @throws \RuntimeException
      */
     public function authenticate()
     {
@@ -139,11 +145,8 @@ class ApiClient implements ApiClientContract
             throw new RuntimeException('Storage URL is missing.', 500);
         }
 
-        $authTokenHeader = $response->getHeader('X-Auth-Token');
-        $storageUrlHeader = $response->getHeader('X-Storage-Url');
-
-        $this->token = $authTokenHeader[0];
-        $this->storageUrl = $storageUrlHeader[0];
+        $this->token = $response->getHeaderLine('X-Auth-Token');
+        $this->storageUrl = $response->getHeaderLine('X-Storage-Url');
     }
 
     /**
@@ -174,6 +177,7 @@ class ApiClient implements ApiClientContract
     /**
      * Performs new API request. $params array will be passed to HTTP Client as is.
      *
+     * @param string $method
      * @param string $url
      * @param array  $params = []
      *

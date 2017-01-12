@@ -2,17 +2,13 @@
 
 namespace ArgentCrusade\Selectel\CloudStorage;
 
-use ArgentCrusade\Selectel\CloudStorage\Collections\Collection;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\ContainerContract;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\FilesTransformerContract;
 use ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException;
-use ArgentCrusade\Selectel\CloudStorage\Exceptions\FileNotFoundException;
-use ArgentCrusade\Selectel\CloudStorage\Exceptions\UploadFailedException;
 use ArgentCrusade\Selectel\CloudStorage\Traits\FilesTransformer;
 use Countable;
 use JsonSerializable;
-use LogicException;
 
 class Container implements ContainerContract, FilesTransformerContract, Countable, JsonSerializable
 {
@@ -136,7 +132,7 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
     }
 
     /**
-     * Returns JSON representation of container.
+     * JSON representation of container.
      *
      * @return array
      */

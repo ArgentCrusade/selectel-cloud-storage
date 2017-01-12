@@ -6,7 +6,6 @@ use ArgentCrusade\Selectel\CloudStorage\Collections\Collection;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\CloudStorageContract;
 use ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException;
-use ArgentCrusade\Selectel\CloudStorage\FileUploader;
 use InvalidArgumentException;
 
 class CloudStorage implements CloudStorageContract
@@ -37,7 +36,7 @@ class CloudStorage implements CloudStorageContract
     }
 
     /**
-     * Returns collection of available containers.
+     * Available containers.
      *
      * @param int    $limit  = 10000
      * @param string $marker = ''

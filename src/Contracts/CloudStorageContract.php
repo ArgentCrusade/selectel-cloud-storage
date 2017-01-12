@@ -5,7 +5,7 @@ namespace ArgentCrusade\Selectel\CloudStorage\Contracts;
 interface CloudStorageContract
 {
     /**
-     * Returns collection of available containers.
+     * Available containers.
      *
      * @param int    $limit  = 10000
      * @param string $marker = ''

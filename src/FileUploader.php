@@ -38,9 +38,9 @@ class FileUploader implements FileUploaderContract
     /**
      * Parses upload parameters and assigns them to appropriate HTTP headers.
      *
-     * @param string $body           = null
-     * @param array  $params         = []
-     * @param bool   $verifyChecksum = true
+     * @param string|resource $body           = null
+     * @param array           $params         = []
+     * @param bool            $verifyChecksum = true
      *
      * @return array
      */

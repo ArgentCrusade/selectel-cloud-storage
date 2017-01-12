@@ -18,7 +18,7 @@ interface CollectionContract
      *
      * @param mixed $key
      *
-     * @return mixed | null
+     * @return mixed|null
      */
     public function get($key);
 }
