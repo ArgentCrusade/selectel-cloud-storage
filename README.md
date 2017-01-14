@@ -87,7 +87,7 @@ $downloadedBytes = $container->downloadedBytes(); // Total number of bytes downl
 $json = json_encode($container); // JSON representation of container.
 
 // Change container type.
-$container->setType(); // Set container visiblity to 'public', 'private' or 'gallery'.
+$container->setType('private'); // Set container visiblity to 'public', 'private' or 'gallery'.
 
 // Check if file exists in container.
 $fileExists = $container->files()->exists('/path/to/file.txt'); // true or false.
