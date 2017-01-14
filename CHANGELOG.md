@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.0] - 2017-01-12
+First release.
+
+### Updated
+- API Calls.
+
 ## [1.0.0] - 2017-01-12
 This is a breaking change.
 
@@ -22,5 +28,6 @@ This is a breaking change.
 ## 0.1.0 - 2017-01-11
 Initial release.
 
+[1.1.0]: https://github.com/ArgentCrusade/selectel-cloud-storage/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/ArgentCrusade/selectel-cloud-storage/compare/0.2.0...1.0.0
 [0.2.0]: https://github.com/ArgentCrusade/selectel-cloud-storage/compare/0.1.0...0.2.0
