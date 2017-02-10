@@ -2,6 +2,7 @@
 
 [![Build Status][ico-travis]][link-travis]
 [![StyleCI][ico-styleci]][link-styleci]
+[![ScrutinizerCI][ico-scrutinizer]][link-scrutinizer]
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
 
@@ -289,8 +290,10 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 [ico-license]: https://poser.pugx.org/argentcrusade/selectel-cloud-storage/license?format=flat
 [ico-travis]: https://api.travis-ci.org/ArgentCrusade/selectel-cloud-storage.svg?branch=master
 [ico-styleci]: https://styleci.io/repos/78674486/shield?branch=master&style=flat
+[ico-scrutinizer]: https://scrutinizer-ci.com/g/ArgentCrusade/selectel-cloud-storage/badges/quality-score.png?b=master
 
 [link-packagist]: https://packagist.org/packages/argentcrusade/selectel-cloud-storage
 [link-travis]: https://travis-ci.org/ArgentCrusade/selectel-cloud-storage
 [link-styleci]: https://styleci.io/repos/78674486
+[link-scrutinizer]: https://scrutinizer-ci.com/g/ArgentCrusade/selectel-cloud-storage/
 [link-author]: https://github.com/tzurbaev
