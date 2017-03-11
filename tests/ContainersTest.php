@@ -1,6 +1,7 @@
 <?php
 
 use ArgentCrusade\Selectel\CloudStorage\CloudStorage;
+use ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException;
 
 class ContainersTest extends PHPUnit_Framework_TestCase
 {
@@ -239,6 +240,31 @@ class ContainersTest extends PHPUnit_Framework_TestCase
     }
 
     /** @test */
+    function container_can_have_meta_data()
+    {
+        $api = TestHelpers::mockApi(function ($api) {
+            $request = $this->getContainerRequest('container1');
+
+            $api->shouldReceive('request')
+                ->with($request['method'], $request['url'])
+                ->andReturn($request['response']);
+        });
+
+        $storage = new CloudStorage($api);
+        $container = $storage->getContainer('container1');
+
+        $this->assertTrue($container->hasMeta('Foo'));
+        $this->assertTrue($container->hasMeta('X-Container-Meta-Bar'));
+        $this->assertFalse($container->hasMeta('Unknown'));
+
+        $this->assertEquals('Bar', $container->getMeta('Foo'));
+        $this->assertEquals('Baz', $container->getMeta('X-Container-Meta-Bar'));
+
+        $this->expectException(InvalidArgumentException::class);
+        $container->getMeta('Unknown');
+    }
+
+    /** @test */
     function container_can_update_its_type()
     {
         $api = TestHelpers::mockApi(function ($api) {
@@ -274,6 +300,39 @@ class ContainersTest extends PHPUnit_Framework_TestCase
 
         $container->setType('public');
         $this->assertEquals('public', $container->type());
+    }
+
+    /** @test */
+    function container_can_update_its_meta()
+    {
+        $api = TestHelpers::mockApi(function ($api) {
+            $containerRequest = $this->getContainerRequest('container1');
+
+            $api->shouldReceive('request')
+                ->with($containerRequest['method'], $containerRequest['url'])
+                ->andReturn($containerRequest['response']);
+
+            $request = $this->getSetContainerMetaRequest('container1', [
+                'X-Container-Meta-Some' => 'Test',
+                'X-Container-Meta-Foo' => 'Bar',
+                'X-Container-Meta-Bar' => 'Baz',
+            ]);
+
+            $api->shouldReceive('request')
+                ->with($request['method'], $request['url'], $request['params'])
+                ->andReturn($request['response']);
+        });
+
+        $storage = new CloudStorage($api);
+        $container = $storage->getContainer('container1');
+
+        $this->assertTrue(
+            $container->setMeta([
+                'Some' => 'Test',
+                'Foo' => 'Bar',
+                'X-Container-Meta-Bar' => 'Baz',
+            ])
+        );
     }
 
     /** @test */
@@ -438,6 +497,18 @@ class ContainersTest extends PHPUnit_Framework_TestCase
         ];
     }
 
+    public function getSetContainerMetaRequest($name, $metas)
+    {
+        return [
+            'method' => 'POST',
+            'url' => '/'.$name,
+            'params' => [
+                'headers' => $metas,
+            ],
+            'response' => TestHelpers::toResponse('', 202, []),
+        ];
+    }
+
     public function getDirectoryCreateRequest($path)
     {
         return [
@@ -506,6 +577,8 @@ class ContainersTest extends PHPUnit_Framework_TestCase
                 'X-Container-Bytes-Used' => 1024,
                 'X-Received-Bytes' => 2048,
                 'X-Transfered-Bytes' => 1024,
+                'X-Container-Meta-Foo' => 'Bar',
+                'X-Container-Meta-Bar' => 'Baz',
             ]),
         ];
     }

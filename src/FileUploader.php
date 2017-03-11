@@ -2,8 +2,8 @@
 
 namespace ArgentCrusade\Selectel\CloudStorage;
 
-use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\FileUploaderContract;
+use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
 use ArgentCrusade\Selectel\CloudStorage\Exceptions\UploadFailedException;
 
 class FileUploader implements FileUploaderContract

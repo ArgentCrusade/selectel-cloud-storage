@@ -2,8 +2,8 @@
 
 namespace ArgentCrusade\Selectel\CloudStorage\Traits;
 
-use ArgentCrusade\Selectel\CloudStorage\Collections\Collection;
 use ArgentCrusade\Selectel\CloudStorage\File;
+use ArgentCrusade\Selectel\CloudStorage\Collections\Collection;
 
 trait FilesTransformer
 {

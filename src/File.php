@@ -2,13 +2,13 @@
 
 namespace ArgentCrusade\Selectel\CloudStorage;
 
-use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
-use ArgentCrusade\Selectel\CloudStorage\Contracts\FileContract;
-use ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException;
-use GuzzleHttp\Psr7\StreamWrapper;
-use InvalidArgumentException;
-use JsonSerializable;
 use LogicException;
+use JsonSerializable;
+use InvalidArgumentException;
+use GuzzleHttp\Psr7\StreamWrapper;
+use ArgentCrusade\Selectel\CloudStorage\Contracts\FileContract;
+use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
+use ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException;
 
 class File implements FileContract, JsonSerializable
 {

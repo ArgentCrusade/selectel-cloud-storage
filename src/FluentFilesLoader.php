@@ -3,12 +3,12 @@
 namespace ArgentCrusade\Selectel\CloudStorage;
 
 use ArgentCrusade\Selectel\CloudStorage\Collections\Collection;
+use ArgentCrusade\Selectel\CloudStorage\Traits\FilesTransformer;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
+use ArgentCrusade\Selectel\CloudStorage\Exceptions\FileNotFoundException;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\FilesTransformerContract;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\FluentFilesLoaderContract;
 use ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException;
-use ArgentCrusade\Selectel\CloudStorage\Exceptions\FileNotFoundException;
-use ArgentCrusade\Selectel\CloudStorage\Traits\FilesTransformer;
 
 class FluentFilesLoader implements FluentFilesLoaderContract, FilesTransformerContract
 {

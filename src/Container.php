@@ -2,17 +2,19 @@
 
 namespace ArgentCrusade\Selectel\CloudStorage;
 
-use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
-use ArgentCrusade\Selectel\CloudStorage\Contracts\ContainerContract;
-use ArgentCrusade\Selectel\CloudStorage\Contracts\FilesTransformerContract;
-use ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException;
-use ArgentCrusade\Selectel\CloudStorage\Traits\FilesTransformer;
 use Countable;
 use JsonSerializable;
+use ArgentCrusade\Selectel\CloudStorage\Traits\MetaData;
+use ArgentCrusade\Selectel\CloudStorage\Contracts\HasMetaData;
+use ArgentCrusade\Selectel\CloudStorage\Traits\FilesTransformer;
+use ArgentCrusade\Selectel\CloudStorage\Contracts\ContainerContract;
+use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
+use ArgentCrusade\Selectel\CloudStorage\Contracts\FilesTransformerContract;
+use ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException;
 
-class Container implements ContainerContract, FilesTransformerContract, Countable, JsonSerializable
+class Container implements ContainerContract, FilesTransformerContract, Countable, JsonSerializable, HasMetaData
 {
-    use FilesTransformer;
+    use FilesTransformer, MetaData;
 
     /**
      * @var \ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract $api
@@ -70,7 +72,7 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
      *
      * @return mixed
      */
-    protected function containerData($key, $default = null)
+    protected function objectData($key, $default = null)
     {
         if (!$this->dataLoaded) {
             $this->loadContainerData();
@@ -80,7 +82,7 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
     }
 
     /**
-     * Lazy loading for container data.
+     * Container data lazy loader.
      *
      * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
      */
@@ -100,13 +102,29 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
         }
 
         $this->dataLoaded = true;
+
+        // We will extract some headers from response
+        // and assign them as container data. Also
+        // we'll try to find any container Meta.
+
         $this->data = [
             'type' => $response->getHeaderLine('X-Container-Meta-Type'),
             'count' => intval($response->getHeaderLine('X-Container-Object-Count')),
             'bytes' => intval($response->getHeaderLine('X-Container-Bytes-Used')),
             'rx_bytes' => intval($response->getHeaderLine('X-Received-Bytes')),
             'tx_bytes' => intval($response->getHeaderLine('X-Transfered-Bytes')),
+            'meta' => $this->extractMetaData($response),
         ];
+    }
+
+    /**
+     * Returns object meta type.
+     *
+     * @return string
+     */
+    protected function objectMetaType()
+    {
+        return 'Container';
     }
 
     /**
@@ -169,13 +187,13 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
     }
 
     /**
-     * Container visibility type.
+     * Container type.
      *
      * @return string
      */
     public function type()
     {
-        return $this->containerData('type', 'public');
+        return $this->objectData('type', 'public');
     }
 
     /**
@@ -185,7 +203,7 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
      */
     public function filesCount()
     {
-        return intval($this->containerData('count', 0));
+        return intval($this->objectData('count', 0));
     }
 
     /**
@@ -205,7 +223,7 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
      */
     public function size()
     {
-        return intval($this->containerData('bytes', 0));
+        return intval($this->objectData('bytes', 0));
     }
 
     /**
@@ -215,7 +233,7 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
      */
     public function uploadedBytes()
     {
-        return intval($this->containerData('rx_bytes', 0));
+        return intval($this->objectData('rx_bytes', 0));
     }
 
     /**
@@ -225,13 +243,13 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
      */
     public function downloadedBytes()
     {
-        return intval($this->containerData('tx_bytes', 0));
+        return intval($this->objectData('tx_bytes', 0));
     }
 
     /**
      * Updates container type.
      *
-     * @param string $type Container type, 'public', 'private' or 'gallery'.
+     * @param string $type Container type: 'public', 'private' or 'gallery'.
      *
      * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
      *
@@ -243,14 +261,14 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
             return $type;
         }
 
-        $response = $this->api->request('POST', $this->absolutePath(), [
-            'headers' => [
-                'X-Container-Meta-Type' => $type,
-            ],
-        ]);
+        // Catch any API Request Exceptions here
+        // so we can replace exception message
+        // with more informative one.
 
-        if ($response->getStatusCode() !== 202) {
-            throw new ApiRequestFailedException('Unable to set container type to "'.$type.'".', $response->getStatusCode());
+        try {
+            $this->setMeta(['Type' => $type]);
+        } catch (ApiRequestFailedException $e) {
+            throw new ApiRequestFailedException('Unable to set container type to "'.$type.'".', $e->getCode());
         }
 
         return $this->data['type'] = $type;

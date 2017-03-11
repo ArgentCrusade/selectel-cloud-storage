@@ -2,11 +2,11 @@
 
 namespace ArgentCrusade\Selectel\CloudStorage\Collections;
 
-use ArgentCrusade\Selectel\CloudStorage\Contracts\Collections\CollectionContract;
-use ArrayAccess;
-use Countable;
 use Iterator;
+use Countable;
+use ArrayAccess;
 use JsonSerializable;
+use ArgentCrusade\Selectel\CloudStorage\Contracts\Collections\CollectionContract;
 
 class Collection implements CollectionContract, ArrayAccess, Countable, Iterator, JsonSerializable
 {

@@ -2,11 +2,11 @@
 
 namespace ArgentCrusade\Selectel\CloudStorage;
 
-use ArgentCrusade\Selectel\CloudStorage\Collections\Collection;
-use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
-use ArgentCrusade\Selectel\CloudStorage\Contracts\CloudStorageContract;
-use ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException;
 use InvalidArgumentException;
+use ArgentCrusade\Selectel\CloudStorage\Collections\Collection;
+use ArgentCrusade\Selectel\CloudStorage\Contracts\CloudStorageContract;
+use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
+use ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException;
 
 class CloudStorage implements CloudStorageContract
 {

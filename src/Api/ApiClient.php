@@ -2,12 +2,12 @@
 
 namespace ArgentCrusade\Selectel\CloudStorage\Api;
 
-use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
-use ArgentCrusade\Selectel\CloudStorage\Exceptions\AuthenticationFailedException;
+use RuntimeException;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
-use RuntimeException;
+use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
+use ArgentCrusade\Selectel\CloudStorage\Exceptions\AuthenticationFailedException;
 
 class ApiClient implements ApiClientContract
 {

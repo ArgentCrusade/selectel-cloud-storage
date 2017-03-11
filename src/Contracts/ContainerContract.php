@@ -58,6 +58,17 @@ interface ContainerContract
     public function setType($type);
 
     /**
+     * Updates container meta data.
+     *
+     * @param array $meta Array of meta data (without "X-Container-Meta" prefixes).
+     *
+     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
+     *
+     * @return bool
+     */
+    public function setMeta(array $meta);
+
+    /**
      * Creates new Fluent files loader instance.
      *
      * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\FluentFilesLoaderContract
