@@ -76,6 +76,47 @@ class ContainersTest extends PHPUnit_Framework_TestCase
     }
 
     /** @test */
+    function container_should_have_default_url()
+    {
+        $api = TestHelpers::mockApi(function ($api) {
+            $request = $this->listContainersRequest();
+
+            $api->shouldReceive('request')
+                ->with($request['method'], $request['url'], $request['params'])
+                ->andReturn($request['response']);
+        });
+
+        $storage = new CloudStorage($api);
+        $containers = $storage->containers();
+        $container = $containers->get('container1');
+
+        $this->assertEquals('http://xxx.selcdn.ru/container1', $container->url());
+        $this->assertEquals('http://xxx.selcdn.ru/container1/file.txt', $container->url('file.txt'));
+        $this->assertEquals('http://xxx.selcdn.ru/container1/file.txt', $container->url('/file.txt'));
+    }
+
+    /** @test */
+    function container_may_have_overriden_url()
+    {
+        $api = TestHelpers::mockApi(function ($api) {
+            $request = $this->listContainersRequest();
+
+            $api->shouldReceive('request')
+                ->with($request['method'], $request['url'], $request['params'])
+                ->andReturn($request['response']);
+        });
+
+        $storage = new CloudStorage($api);
+        $containers = $storage->containers();
+        $container = $containers->get('container1');
+
+        $container->setUrl('https://static.example.org');
+        $this->assertEquals('https://static.example.org', $container->url());
+        $this->assertEquals('https://static.example.org/file.txt', $container->url('file.txt'));
+        $this->assertEquals('https://static.example.org/file.txt', $container->url('/file.txt'));
+    }
+
+    /** @test */
     function container_files_can_be_listed()
     {
         $api = TestHelpers::mockApi(function ($api) {

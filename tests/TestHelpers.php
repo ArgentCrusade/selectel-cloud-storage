@@ -16,7 +16,10 @@ class TestHelpers
             $methods = ['request'];
         }
 
+        $methods[] = 'storageUrl';
+
         $api = Mockery::mock(ApiClient::class.'['.implode(',', $methods).']', ['username', 'password']);
+        $api->shouldReceive('storageUrl')->atLeast()->once()->andReturn('http://xxx.selcdn.ru');
 
         if (is_callable($callback)) {
             $callback($api);

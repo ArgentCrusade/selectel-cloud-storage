@@ -12,6 +12,15 @@ interface ContainerContract
     public function name();
 
     /**
+     * Container's root URL.
+     *
+     * @param string $path = ''
+     *
+     * @return string
+     */
+    public function url($path = '');
+
+    /**
      * Container visibility type.
      *
      * @return string

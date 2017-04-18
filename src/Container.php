@@ -50,6 +50,13 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
     protected $dataLoaded = false;
 
     /**
+     * Container URL. Uses "X-Storage-Url/container-name" by default.
+     *
+     * @var string
+     */
+    protected $url;
+
+    /**
      * @param \ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract $api
      * @param \ArgentCrusade\Selectel\CloudStorage\FileUploader                    $uploader
      * @param string                                                               $name
@@ -62,6 +69,7 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
         $this->containerName = $name;
         $this->data = $data;
         $this->dataLoaded = !empty($data);
+        $this->url = rtrim($api->storageUrl(), '/').'/'.$name;
     }
 
     /**
@@ -187,6 +195,18 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
     }
 
     /**
+     * Get container's root URL.
+     *
+     * @param string $path = ''
+     *
+     * @return string
+     */
+    public function url($path = '')
+    {
+        return $this->url.($path ? '/'.ltrim($path, '/') : '');
+    }
+
+    /**
      * Container type.
      *
      * @return string
@@ -275,6 +295,20 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
     }
 
     /**
+     * Set container's root URL.
+     *
+     * @param string $url
+     *
+     * @return static
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+
+        return $this;
+    }
+
+    /**
      * Creates new Fluent files loader instance.
      *
      * @return \ArgentCrusade\Selectel\CloudStorage\Contracts\FluentFilesLoaderContract
@@ -312,6 +346,10 @@ class Container implements ContainerContract, FilesTransformerContract, Countabl
      * Deletes directory.
      *
      * @param string $name Directory name.
+     *
+     * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\ApiRequestFailedException
+     *
+     * @return bool
      */
     public function deleteDir($name)
     {
