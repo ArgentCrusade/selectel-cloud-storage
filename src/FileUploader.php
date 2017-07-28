@@ -26,6 +26,7 @@ class FileUploader implements FileUploaderContract
         $response = $api->request('PUT', $path, [
             'headers' => $this->convertUploadParamsToHeaders($body, $params, $verifyChecksum),
             'body' => $body,
+            'query' => $this->extractQueryParameters($params),
         ]);
 
         if ($response->getStatusCode() !== 201) {
@@ -66,5 +67,26 @@ class FileUploader implements FileUploaderContract
         }
 
         return $headers;
+    }
+
+    /**
+     * Parses upload parameters and assigns them to appropriate query parameters.
+     *
+     * @param array $params
+     *
+     * @return array
+     */
+    protected function extractQueryParameters(array $params)
+    {
+        $availableParams = ['extract-archive'];
+        $query = [];
+
+        foreach ($params as $key => $value) {
+            if (in_array($key, $availableParams)) {
+                $query[$key] = $value;
+            }
+        }
+
+        return $query;
     }
 }

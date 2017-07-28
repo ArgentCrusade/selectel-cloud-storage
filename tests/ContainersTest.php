@@ -450,6 +450,35 @@ class ContainersTest extends PHPUnit_Framework_TestCase
     }
 
     /** @test */
+    function files_can_be_uploaded_to_container_from_string_and_auto_extract()
+    {
+        $contents = '<h1>Hello World!</h1>';
+        $path = '/index.html';
+        $etag = md5($contents);
+
+        $api = TestHelpers::mockApi(function ($api) use ($path, $contents, $etag) {
+            $requests = [
+                $this->listContainersRequest(),
+                $this->uploadFromStringRequest('container1', $path, $contents, $etag, ['extract-archive' => 'tar']),
+            ];
+
+            foreach ($requests as $request) {
+                $api->shouldReceive('request')
+                    ->with($request['method'], $request['url'], $request['params'])
+                    ->andReturn($request['response']);
+            }
+        });
+
+        $storage = new CloudStorage($api);
+        $containers = $storage->containers();
+        $container = $containers->get('container1');
+
+        $uploadedEtag = $container->uploadFromString($path, $contents, ['extract-archive' => 'tar']);
+
+        $this->assertEquals($etag, $uploadedEtag);
+    }
+
+    /** @test */
     function files_can_be_uploaded_to_container_from_stream()
     {
         $resource = fopen(__DIR__.'/fixtures/test.html', 'r');
@@ -473,6 +502,34 @@ class ContainersTest extends PHPUnit_Framework_TestCase
         $container = $containers->get('container1');
 
         $uploadedEtag = $container->uploadFromStream($path, $resource);
+
+        $this->assertInternalType('string', $uploadedEtag);
+    }
+
+    /** @test */
+    function files_can_be_uploaded_to_container_from_stream_and_auto_extract()
+    {
+        $resource = fopen(__DIR__.'/fixtures/test.html', 'r');
+        $path = '/index.html';
+
+        $api = TestHelpers::mockApi(function ($api) use ($path, $resource) {
+            $requests = [
+                $this->listContainersRequest(),
+                $this->uploadFromStreamRequest('container1', $path, $resource, ['extract-archive' => 'tar']),
+            ];
+
+            foreach ($requests as $request) {
+                $api->shouldReceive('request')
+                    ->with($request['method'], $request['url'], $request['params'])
+                    ->andReturn($request['response']);
+            }
+        });
+
+        $storage = new CloudStorage($api);
+        $containers = $storage->containers();
+        $container = $containers->get('container1');
+
+        $uploadedEtag = $container->uploadFromStream($path, $resource, ['extract-archive' => 'tar']);
 
         $this->assertInternalType('string', $uploadedEtag);
     }
@@ -575,7 +632,7 @@ class ContainersTest extends PHPUnit_Framework_TestCase
         ];
     }
 
-    public function uploadFromStreamRequest($container, $path, $resource)
+    public function uploadFromStreamRequest($container, $path, $resource, $query = [])
     {
         return [
             'method' => 'PUT',
@@ -583,6 +640,7 @@ class ContainersTest extends PHPUnit_Framework_TestCase
             'params' => [
                 'headers' => [],
                 'body' => $resource,
+                'query' => $query,
             ],
             'response' => TestHelpers::toResponse([], 201, [
                 'etag' => md5('test'),
@@ -590,7 +648,7 @@ class ContainersTest extends PHPUnit_Framework_TestCase
         ];
     }
 
-    public function uploadFromStringRequest($container, $path, $contents, $etag)
+    public function uploadFromStringRequest($container, $path, $contents, $etag, $query = [])
     {
         return [
             'method' => 'PUT',
@@ -600,6 +658,7 @@ class ContainersTest extends PHPUnit_Framework_TestCase
                     'ETag' => $etag,
                 ],
                 'body' => $contents,
+                'query' => $query,
             ],
             'response' => TestHelpers::toResponse([], 201, [
                 'etag' => $etag,
