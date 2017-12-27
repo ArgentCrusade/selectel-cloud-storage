@@ -5,7 +5,7 @@ namespace ArgentCrusade\Selectel\CloudStorage\Api;
 use RuntimeException;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\BadResponseException;
 use ArgentCrusade\Selectel\CloudStorage\Contracts\Api\ApiClientContract;
 use ArgentCrusade\Selectel\CloudStorage\Exceptions\AuthenticationFailedException;
 
@@ -87,9 +87,6 @@ class ApiClient implements ApiClientContract
 
         return $this->httpClient = new Client([
             'base_uri' => $this->storageUrl(),
-            'headers' => [
-                'X-Auth-Token' => $this->token(),
-            ],
         ]);
     }
 
@@ -131,7 +128,7 @@ class ApiClient implements ApiClientContract
      */
     public function authenticate()
     {
-        if (!is_null($this->token)) {
+        if ($this->authenticated()) {
             return;
         }
 
@@ -153,12 +150,13 @@ class ApiClient implements ApiClientContract
      * Performs authentication request and returns its response.
      *
      * @throws \ArgentCrusade\Selectel\CloudStorage\Exceptions\AuthenticationFailedException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function authenticationResponse()
     {
-        $client = new Client();
+        $client = !is_null($this->httpClient) ? $this->httpClient : new Client();
 
         try {
             $response = $client->request('GET', static::AUTH_URL, [
@@ -167,8 +165,12 @@ class ApiClient implements ApiClientContract
                     'X-Auth-Key' => $this->password,
                 ],
             ]);
-        } catch (RequestException $e) {
-            throw new AuthenticationFailedException('Given credentials are wrong.', 403);
+        } catch (BadResponseException $e) {
+            if ($e->getResponse()->getStatusCode() === 403) {
+                throw new AuthenticationFailedException('Given credentials are wrong.', 403);
+            }
+
+            throw $e;
         }
 
         return $response;
@@ -189,6 +191,12 @@ class ApiClient implements ApiClientContract
             $this->authenticate();
         }
 
+        $defaults = [
+            'headers' => ['X-Auth-Token' => $this->token()],
+        ];
+
+        $params = array_merge_recursive($defaults, $params);
+
         if (!isset($params['query'])) {
             $params['query'] = [];
         }
@@ -197,7 +205,7 @@ class ApiClient implements ApiClientContract
 
         try {
             $response = $this->getHttpClient()->request($method, $url, $params);
-        } catch (RequestException $e) {
+        } catch (BadResponseException $e) {
             return $e->getResponse();
         }
 
